@@ -1,0 +1,9 @@
+{
+  "cleanUrls": true,
+  "rewrites": [
+    { "source": "/book", "destination": "/book.html" },
+    { "source": "/book/", "destination": "/book.html" },
+    { "source": "/quote", "destination": "/quote.html" },
+    { "source": "/quote/", "destination": "/quote.html" }
+  ]
+}
