@@ -15,6 +15,14 @@
 .filetUpgradeBox small{display:block;margin-top:5px;color:#6e6254;font-size:12px;line-height:1.45}
 .filetUpgradeBox small::first-line{color:#9a6a12}
 
+
+.addressHelp{margin-top:6px;color:#766b5f;font-size:12px;line-height:1.45}
+.addressHelp.ok{color:#2f7a42}
+.addressHelp.warn{color:#9a6510}
+.pac-container{z-index:99999!important;border-radius:10px!important;margin-top:4px!important;box-shadow:0 8px 24px rgba(0,0,0,.14)!important;border:1px solid #e4d8c7!important;font-family:inherit!important}
+.pac-item{padding:9px 12px!important;font-size:14px!important;line-height:1.35!important}
+.pac-item-query{font-size:14px!important;color:#17130d!important}
+
 </style><link rel="icon" href="data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCAxMjAgMTIwIj48cmVjdCB3aWR0aD0iMTIwIiBoZWlnaHQ9IjEyMCIgcng9IjYwIiBmaWxsPSIjMTUxMjBmIi8+PHBhdGggZD0iTTYxIDEzYzggMjAtNSAyNyA3IDQwIDYtMTQgMTctMjEgMTYtMzUgMTUgMTYgMjQgMzMgMTkgNTMtNSAyMy0yMyAzOC00NCAzOFMyMCA5NCAxOCA3MmMtMi0xOSA5LTM0IDI0LTQ3LTEgMTYgNCAyNCAxMiAzMSAyLTE1LTItMjggNy00M3oiIGZpbGw9IiNlZTU0MjgiLz48cGF0aCBkPSJNNjAgNTNjOCAxMCAxNCAxOCAxMiAyOC0xIDktNyAxNS0xNCAxNS05IDAtMTUtNy0xNS0xNiAwLTEwIDgtMTggMTctMjd6IiBmaWxsPSIjZjRiOTQyIi8+PC9zdmc+Cg=="></head><body><main class="bookPage"><nav class="nav wrap"><a class="brand" href="/"><img src="data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCAxMjAgMTIwIj48cmVjdCB3aWR0aD0iMTIwIiBoZWlnaHQ9IjEyMCIgcng9IjYwIiBmaWxsPSIjMTUxMjBmIi8+PHBhdGggZD0iTTYxIDEzYzggMjAtNSAyNyA3IDQwIDYtMTQgMTctMjEgMTYtMzUgMTUgMTYgMjQgMzMgMTkgNTMtNSAyMy0yMyAzOC00NCAzOFMyMCA5NCAxOCA3MmMtMi0xOSA5LTM0IDI0LTQ3LTEgMTYgNCAyNCAxMiAzMSAyLTE1LTItMjggNy00M3oiIGZpbGw9IiNlZTU0MjgiLz48cGF0aCBkPSJNNjAgNTNjOCAxMCAxNCAxOCAxMiAyOC0xIDktNyAxNS0xNCAxNS05IDAtMTUtNy0xNS0xNiAwLTEwIDgtMTggMTctMjd6IiBmaWxsPSIjZjRiOTQyIi8+PC9zdmc+Cg==" alt="Hibachi by Lin"><b>HIBACHI BY LIN</b></a><a class="backHome" href="/">← Back to home</a></nav><section class="bookHero"><div class="wrap"><p class="eyebrow">BOOK YOUR EVENT</p><h1>Build your hibachi order.</h1><p>Choose your event date and preferred time. We confirm the complete itemized cash quote before requesting a $100 deposit.</p></div></section><section class="bookBody"><div class="wrap bookLayout"><aside><h2>Your pricing</h2><div class="sidePrice"><p><span>Adult · 2 proteins</span><b>$50</b></p><p><span>Child 4–12 · 1 protein</span><b>$25</b></p><p><span>Age 3 & under</span><b>Free</b></p></div><div class="sideNote"><b>$500 food minimum</b><p>Travel and optional gratuity are confirmed by email. Cash only.</p></div></aside><div id="formMount"></div></div></section></main>
 <script>
 const proteins=['Chicken','Steak','Shrimp','Salmon'];
@@ -42,10 +50,79 @@ function render(){if(new URLSearchParams(location.search).get('submitted')==='1'
  const ap=totalProtein(adultP),cp=totalProtein(childP),complete=ap===adults*2&&(children===0||cp===children),t=price();
  mount.innerHTML=`<form id="bookingForm" class="bookingCard" action="https://formsubmit.co/booking@hibachibylin.com" method="POST"><input type="hidden" name="_next" value="https://hibachibylin.com/book/?submitted=1"><input type="hidden" name="_subject" value="New Hibachi by Lin booking request"><input type="hidden" name="_cc" value="linsongwei2023@gmail.com"><input type="hidden" name="_template" value="basic"><input type="hidden" name="_captcha" value="false"><input id="replyto" type="hidden" name="_replyto"><input type="text" name="_honey" class="honeypot" tabindex="-1"><input id="quoteLink" type="hidden" name="OPEN QUOTE BUILDER — TAP OR COPY THIS LINK"><input id="chicagoTime" type="hidden" name="Submitted at Chicago time"><input type="hidden" name="Estimated food and add-ons total" value="$${t}"><input type="hidden" name="Adults" value="${adults}"><input type="hidden" name="Children age 4–12" value="${children}"><input type="hidden" name="Children age 3 and under" value="${toddlers}">${proteins.map(p=>`<input type="hidden" name="Adult ${p} protein servings" value="${adultP[p]||0}"><input type="hidden" name="Child ${p} protein servings" value="${childP[p]||0}">`).join('')}${extras.map(([n])=>`<input type="hidden" name="${n} orders" value="${extraC[n]||0}">`).join('')}<input type="hidden" name="Filet Mignon upgrades" value="${filetUpgrade}">
  <div class="formTop"><div><small>ESTIMATED FOOD & ADD-ONS</small><strong>$${t.toLocaleString()}</strong></div><span>No payment now</span></div>${adults*50+children*25<500?'<p class="minimum">$500 food minimum applied</p>':''}<p class="estimateNotice">Food estimate only. Travel and optional gratuity will appear in the itemized cash quote emailed before any deposit is requested.</p>
- <h3 class="formSection">1. Date & location</h3><div class="fieldRow"><label>Event date<input name="Event date" type="date" min="${chicagoToday()}" required></label><label>Preferred time<select name="Preferred time" required><option value="" disabled selected>Select a time</option>${Array.from({length:14},(_,i)=>{const m=780+i*30,h24=Math.floor(m/60),mm=m%60,h=h24>12?h24-12:h24;return `<option value="${String(h24).padStart(2,'0')}:${String(mm).padStart(2,'0')}">${h}:${String(mm).padStart(2,'0')} PM</option>`}).join('')}</select></label></div><label>Service area<select name="Service area" required><option value="" disabled selected>Select your area</option>${cities.map(c=>`<option>${c}</option>`).join('')}</select></label><label>Full event address<input name="Full event address" placeholder="Street, city, state, ZIP" required autocomplete="street-address"></label>
+ <h3 class="formSection">1. Date & location</h3><div class="fieldRow"><label>Event date<input name="Event date" type="date" min="${chicagoToday()}" required></label><label>Preferred time<select name="Preferred time" required><option value="" disabled selected>Select a time</option>${Array.from({length:14},(_,i)=>{const m=780+i*30,h24=Math.floor(m/60),mm=m%60,h=h24>12?h24-12:h24;return `<option value="${String(h24).padStart(2,'0')}:${String(mm).padStart(2,'0')}">${h}:${String(mm).padStart(2,'0')} PM</option>`}).join('')}</select></label></div><label>Service area<select name="Service area" required><option value="" disabled selected>Select your area</option>${cities.map(c=>`<option>${c}</option>`).join('')}</select></label><label>Full event address<input name="Full event address" placeholder="Street, city, state, ZIP" required autocomplete="street-address" id="eventAddress" inputmode="text">
+<div id="addressAutocompleteHelp" class="addressHelp">
+  Start typing and choose your full address from the Google suggestions.
+</div>
+<input type="hidden" id="addressLat" name="Address latitude">
+<input type="hidden" id="addressLng" name="Address longitude">
+<input type="hidden" id="addressPlaceId" name="Google Place ID">
+</label>
  <h3 class="formSection">2. Guests & menu</h3>${guestRow('Adults','$50 · 2 protein servings each','adults',adults)}${guestRow('Children age 4–12','$25 · 1 protein serving each','children',children)}${guestRow('Children age 3 & under','Free','toddlers',toddlers)}<div class="proteinFields"><b>Protein serving selections</b><p class="proteinIntro">Divide the included servings among Chicken, Steak, Shrimp, and Salmon. The total cannot exceed the amount included for your guest count.</p>${alloc('Adult proteins','a',adultP,adults*2)}${children?alloc('Child proteins','c',childP,children):''}${filetRow()}<div class="orderExample"><b>Order example</b><p>10 adults include 20 protein servings. One possible mix is <strong>10 Chicken, 6 Steak, and 4 Shrimp</strong>. If there are 5 children, choose exactly 5 child servings in any combination.</p></div></div><div class="extras"><b>Appetizers & add-ons</b>${extras.map(([n,p])=>guestRow(n,`+$${p} per order`,`extra:${n}`,extraC[n]||0)).join('')}</div>
  <h3 class="formSection">3. Contact & allergies</h3><label>Does anyone have food allergies?<select name="Any food allergies" required><option value="" disabled selected>Select one</option><option>No</option><option>Yes</option></select></label><label>Allergy details<textarea name="Food allergy details" placeholder="If yes, list the allergy and affected guest."></textarea></label><label>Your name<input name="Customer name" required autocomplete="name"></label><div class="fieldRow"><label>Email<input id="email" name="Customer email" type="email" required autocomplete="email"></label><label>Phone number<input name="Customer phone number" type="tel" required autocomplete="tel"></label></div><label class="confirm"><input type="checkbox" required><span>I understand this is a request only. My date is confirmed after the order is approved and the $100 deposit is received.</span></label><p id="allocErr" class="allocationError hidden"></p><button class="submit" type="submit" ${complete?'':'disabled'}>Send booking request →</button>${complete?'':'<p class="fine">Complete all included protein servings to enable submission.</p>'}<p class="fine">No payment is collected on this website.</p></form>`;
  restoreDraft();bind();}
 function bind(){document.querySelectorAll('.counter').forEach(c=>c.ondblclick=e=>e.preventDefault());document.querySelectorAll('[data-g]').forEach(b=>b.onclick=()=>{captureDraft();const k=b.dataset.g,d=Number(b.dataset.d);if(k==='adults'){adults=Math.max(0,adults+d);clamp(adultP,adults*2);clampFilet()}else if(k==='children'){children=Math.max(0,children+d);clamp(childP,children);clampFilet()}else if(k==='toddlers')toddlers=Math.max(0,toddlers+d);else if(k==='filet'){const max=steakPortions();filetUpgrade=Math.max(0,Math.min(max,filetUpgrade+d))}else if(k.startsWith('extra:')){const n=k.slice(6);extraC[n]=Math.max(0,(extraC[n]||0)+d)}render()});document.querySelectorAll('[data-p]').forEach(b=>b.onclick=()=>{captureDraft();const [type,n]=b.dataset.p.split('|'),d=Number(b.dataset.d),obj=type==='a'?adultP:childP,limit=type==='a'?adults*2:children;if(d>0&&totalProtein(obj)>=limit)return;obj[n]=Math.max(0,(obj[n]||0)+d);if(n==='Steak')clampFilet();render()});const f=document.getElementById('bookingForm');if(f)f.onsubmit=e=>{if(totalProtein(adultP)!==adults*2||totalProtein(childP)!==children){e.preventDefault();const er=document.getElementById('allocErr');er.textContent=totalProtein(adultP)!==adults*2?`Please select all ${adults*2} adult protein servings before submitting.`:`Please select all ${children} child protein servings before submitting.`;er.classList.remove('hidden');return}document.getElementById('replyto').value=document.getElementById('email').value;document.getElementById('chicagoTime').value=new Intl.DateTimeFormat('en-US',{timeZone:'America/Chicago',year:'numeric',month:'short',day:'numeric',hour:'numeric',minute:'2-digit',second:'2-digit',timeZoneName:'short'}).format(new Date());const data=new FormData(f),nz=o=>Object.fromEntries(Object.entries(o).filter(([,v])=>v>0));const payload={r:`HBL-${Date.now().toString().slice(-7)}`,d:data.get('Event date'),t:data.get('Preferred time'),a:data.get('Full event address'),n:data.get('Customer name'),e:data.get('Customer email'),p:data.get('Customer phone number'),y:data.get('Food allergy details'),g:[adults,children,toddlers],ap:nz(adultP),cp:nz(childP),x:nz(extraC),f:filetUpgrade};document.getElementById('quoteLink').value=`https://hibachibylin.com/quote/?d=${compact(payload)}`}}
 render();
-</script></body></html>
+</script>
+<script>
+(function(){
+  const API_KEY = 'AIzaSyC8Z9RTM9IVKKZU9rGFdf19iyWQxYTfVog';
+
+  function setAddressHelp(message, cls=''){
+    const el=document.getElementById('addressAutocompleteHelp');
+    if(!el)return;
+    el.textContent=message;
+    el.className='addressHelp'+(cls?' '+cls:'');
+  }
+
+  function initAddressAutocomplete(){
+    const input=document.getElementById('eventAddress');
+    if(!input || !window.google || !google.maps || !google.maps.places) return;
+
+    const autocomplete=new google.maps.places.Autocomplete(input,{
+      types:['address'],
+      componentRestrictions:{country:'us'},
+      fields:['formatted_address','geometry','place_id']
+    });
+
+    autocomplete.addListener('place_changed',()=>{
+      const place=autocomplete.getPlace();
+      if(!place || !place.formatted_address){
+        setAddressHelp('Please choose a complete address from the Google suggestions.','warn');
+        return;
+      }
+      input.value=place.formatted_address;
+      const loc=place.geometry && place.geometry.location;
+      document.getElementById('addressLat').value=loc?loc.lat():'';
+      document.getElementById('addressLng').value=loc?loc.lng():'';
+      document.getElementById('addressPlaceId').value=place.place_id||'';
+      input.dataset.googleValidated='1';
+      setAddressHelp('Address selected ✓','ok');
+    });
+
+    input.addEventListener('input',()=>{
+      input.dataset.googleValidated='';
+      document.getElementById('addressLat').value='';
+      document.getElementById('addressLng').value='';
+      document.getElementById('addressPlaceId').value='';
+      setAddressHelp('Start typing and choose your full address from the Google suggestions.');
+    });
+  }
+
+  window.initHibachiAddressAutocomplete=initAddressAutocomplete;
+
+  if(API_KEY==='AIzaSyC8Z9RTM9IVKKZU9rGFdf19iyWQxYTfVog'){
+    setAddressHelp('Address suggestions will be enabled after the Google Maps API key is added.','warn');
+    return;
+  }
+
+  const s=document.createElement('script');
+  s.src='https://maps.googleapis.com/maps/api/js?key='+encodeURIComponent(API_KEY)+'&libraries=places&callback=initHibachiAddressAutocomplete';
+  s.async=true;
+  s.defer=true;
+  s.onerror=()=>setAddressHelp('Address suggestions are temporarily unavailable. You can still type the address manually.','warn');
+  document.head.appendChild(s);
+})();
+</script>
+
+</body></html>
