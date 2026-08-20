@@ -111,7 +111,7 @@ render();
 
   window.initHibachiAddressAutocomplete=initAddressAutocomplete;
 
-  if(API_KEY==='AIzaSyC8Z9RTM9IVKKZU9rGFdf19iyWQxYTfVog'){
+  if(!API_KEY || API_KEY==='YOUR_GOOGLE_MAPS_API_KEY_HERE'){
     setAddressHelp('Address suggestions will be enabled after the Google Maps API key is added.','warn');
     return;
   }
