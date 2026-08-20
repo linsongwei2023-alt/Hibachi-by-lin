@@ -19,7 +19,7 @@
 <script>
 const proteins=['Chicken','Steak','Shrimp','Salmon'];
 const cities=['Chicago & surrounding areas','Milwaukee','Other Wisconsin locations','Indiana','Michigan'];
-const extras=[['Edamame',5],['Extra vege / tofu',5],['Fried rice',5],['Noodles',5],['Extra chicken',7],['Extra salmon',10],['Extra scallop (6 pcs)',10],['Extra shrimp (6 pcs)',10],['Extra steak',10],['Gyoza (8 pcs)',10],['Extra lobster tail',15]];
+const extras=[['Edamame',5],['Gyoza (8pcs)',10],['Vege / Tofu',5],['Fried Rice',5],['Noodle',5],['Extra Chicken',7],['Extra Steak',10],['Extra Filet Mignon',15],['Extra Shrimp (6pcs)',10],['Extra Scallop (6pcs)',10],['Extra Lobster Tail',15]];
 let adults=10,children=0,toddlers=0,adultP=Object.fromEntries(proteins.map(x=>[x,0])),childP=Object.fromEntries(proteins.map(x=>[x,0])),extraC=Object.fromEntries(extras.map(x=>[x[0],0])),filetUpgrade=0;
 let formDraft={},confirmDraft=false;
 function captureDraft(){const f=document.getElementById('bookingForm');if(!f)return;formDraft={};f.querySelectorAll('input:not([type=hidden]),select,textarea').forEach(el=>{if(el.closest('.counter'))return;const k=el.name||el.id;if(!k)return;formDraft[k]=(el.type==='checkbox'||el.type==='radio')?el.checked:el.value});const c=f.querySelector('.confirm input');confirmDraft=!!(c&&c.checked)}
