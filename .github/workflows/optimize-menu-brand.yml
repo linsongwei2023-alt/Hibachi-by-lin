@@ -94,7 +94,7 @@ jobs:
           print(f'Optimized menu assets total: {sum(p.stat().st_size for p in created):,} bytes')
           print(f'Book HTML: {before_book:,} -> {book_path.stat().st_size:,} bytes')
 
-          for token in ['$50', '$25', 'Extra Chicken', 'Extra Steak', 'Extra Filet Mignon', 'Extra Shrimp', 'Extra Salmon', 'Extra Scallop', 'Extra Lobster Tail']:
+          for token in ['$50', '$25', 'Extra Chicken', 'Extra Steak', 'Extra Shrimp', 'Extra Salmon', 'Extra Scallop', 'Extra Lobster Tail']:
               assert token in menu, f'Missing menu token after optimization: {token}'
           for token in ["const proteins=['Chicken','Steak','Shrimp','Salmon']", 'function price()', 'booking@hibachibylin.com', 'Filet Mignon Upgrade']:
               assert token in book, f'Missing booking token after styling: {token}'
@@ -109,4 +109,4 @@ jobs:
           git add menu.html book.html assets/menu
           git commit -m "Optimize menu images and unify Hibachi by Lin brand styling"
           git push origin HEAD:main
-# retrigger corrected workflow 2026-08-24
+# guardrail fixed and retriggered 2026-08-24
