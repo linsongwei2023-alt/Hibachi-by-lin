@@ -37,7 +37,6 @@ jobs:
           menu = menu_path.read_text(encoding='utf-8')
           book = book_path.read_text(encoding='utf-8')
           original_menu = menu
-          original_book = book
           before_menu = len(menu.encode('utf-8'))
           before_book = len(book.encode('utf-8'))
 
@@ -87,6 +86,19 @@ jobs:
           if book_marker not in book:
               book = book.replace('</head>', book_css + '</head>', 1)
 
+          # Guardrails before writing files.
+          for token in ['$50', '$25', 'Chicken', 'Steak', 'Shrimp', 'Salmon', 'Fried Rice', 'Noodle', 'Gyoza', 'Edamame', 'Lobster']:
+              assert token in original_menu, f'Expected current menu token missing before optimization: {token}'
+              assert token in menu, f'Menu content changed unexpectedly after optimization: {token}'
+          assert len(matches) == 6, f'Expected 6 embedded menu images, found {len(matches)}.'
+          assert len(created) == 6, f'Expected 6 optimized menu assets, created {len(created)}.'
+          assert all(public_path in menu for public_path in uri_to_path.values()), 'Not all optimized menu image paths were written into menu.html.'
+          assert pattern.search(menu) is None, 'Embedded menu images remain after optimization.'
+
+          # Booking logic guardrails remain strict.
+          for token in ["const proteins=['Chicken','Steak','Shrimp','Salmon']", 'function price()', 'booking@hibachibylin.com', 'Filet Mignon Upgrade']:
+              assert token in book, f'Missing booking token after styling: {token}'
+
           menu_path.write_text(menu, encoding='utf-8')
           book_path.write_text(book, encoding='utf-8')
 
@@ -95,20 +107,6 @@ jobs:
           print(f'Menu HTML: {before_menu:,} -> {menu_path.stat().st_size:,} bytes')
           print(f'Optimized menu assets total: {sum(p.stat().st_size for p in created):,} bytes')
           print(f'Book HTML: {before_book:,} -> {book_path.stat().st_size:,} bytes')
-
-          # Structural guardrails for Menu: compare non-image content against the original rather than historical item names.
-          original_without_images = pattern.sub('__EMBEDDED_IMAGE__', original_menu)
-          optimized_without_images = re.sub(r'/assets/menu/menu-[^\"\')]+\.webp', '__EMBEDDED_IMAGE__', menu)
-          for token in ['$50', '$25', 'Chicken', 'Steak', 'Shrimp', 'Salmon', 'Fried Rice', 'Noodle', 'Gyoza', 'Edamame', 'Lobster']:
-              assert token in original_without_images, f'Expected current menu token missing before optimization: {token}'
-              assert token in optimized_without_images, f'Menu content changed unexpectedly after optimization: {token}'
-          assert optimized_without_images.count('__EMBEDDED_IMAGE__') == original_without_images.count('__EMBEDDED_IMAGE__'), 'Embedded image count changed unexpectedly.'
-          assert '<html' in menu.lower() and '</html>' in menu.lower() and '<body' in menu.lower(), 'Menu document structure is incomplete.'
-
-          # Booking logic guardrails remain strict.
-          for token in ["const proteins=['Chicken','Steak','Shrimp','Salmon']", 'function price()', 'booking@hibachibylin.com', 'Filet Mignon Upgrade']:
-              assert token in book, f'Missing booking token after styling: {token}'
-          assert len(uri_to_path) > 0, 'No embedded menu images were extracted; aborting rather than committing an unexpected result.'
           PY
       - name: Commit optimized files and remove one-time workflow
         shell: bash
