@@ -36,6 +36,8 @@ jobs:
 
           menu = menu_path.read_text(encoding='utf-8')
           book = book_path.read_text(encoding='utf-8')
+          original_menu = menu
+          original_book = book
           before_menu = len(menu.encode('utf-8'))
           before_book = len(book.encode('utf-8'))
 
@@ -94,8 +96,16 @@ jobs:
           print(f'Optimized menu assets total: {sum(p.stat().st_size for p in created):,} bytes')
           print(f'Book HTML: {before_book:,} -> {book_path.stat().st_size:,} bytes')
 
-          for token in ['$50', '$25', 'Extra Chicken', 'Extra Steak', 'Extra Shrimp', 'Extra Salmon', 'Extra Scallop', 'Extra Lobster Tail']:
-              assert token in menu, f'Missing menu token after optimization: {token}'
+          # Structural guardrails for Menu: compare non-image content against the original rather than historical item names.
+          original_without_images = pattern.sub('__EMBEDDED_IMAGE__', original_menu)
+          optimized_without_images = re.sub(r'/assets/menu/menu-[^\"\')]+\.webp', '__EMBEDDED_IMAGE__', menu)
+          for token in ['$50', '$25', 'Chicken', 'Steak', 'Shrimp', 'Salmon', 'Fried Rice', 'Noodle', 'Gyoza', 'Edamame', 'Lobster']:
+              assert token in original_without_images, f'Expected current menu token missing before optimization: {token}'
+              assert token in optimized_without_images, f'Menu content changed unexpectedly after optimization: {token}'
+          assert optimized_without_images.count('__EMBEDDED_IMAGE__') == original_without_images.count('__EMBEDDED_IMAGE__'), 'Embedded image count changed unexpectedly.'
+          assert '<html' in menu.lower() and '</html>' in menu.lower() and '<body' in menu.lower(), 'Menu document structure is incomplete.'
+
+          # Booking logic guardrails remain strict.
           for token in ["const proteins=['Chicken','Steak','Shrimp','Salmon']", 'function price()', 'booking@hibachibylin.com', 'Filet Mignon Upgrade']:
               assert token in book, f'Missing booking token after styling: {token}'
           assert len(uri_to_path) > 0, 'No embedded menu images were extracted; aborting rather than committing an unexpected result.'
@@ -109,4 +119,3 @@ jobs:
           git add menu.html book.html assets/menu
           git commit -m "Optimize menu images and unify Hibachi by Lin brand styling"
           git push origin HEAD:main
-# guardrail fixed and retriggered 2026-08-24
