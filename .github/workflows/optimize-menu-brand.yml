@@ -28,83 +28,34 @@ jobs:
           from pathlib import Path
           from PIL import Image
           import base64, hashlib, io, re
-
-          menu_path = Path('menu.html')
-          book_path = Path('book.html')
-          out_dir = Path('assets/menu')
-          out_dir.mkdir(parents=True, exist_ok=True)
-
-          menu = menu_path.read_text(encoding='utf-8')
-          book = book_path.read_text(encoding='utf-8')
-          before_menu = len(menu.encode('utf-8'))
-          before_book = len(book.encode('utf-8'))
-
-          pattern = re.compile(r'data:image/(?P<fmt>png|jpeg|jpg|webp);base64,(?P<data>[A-Za-z0-9+/=]+)', re.I)
-          matches = list(pattern.finditer(menu))
-          uri_to_path = {}
-          digest_to_path = {}
-          created = []
-
+          menu_path=Path('menu.html'); book_path=Path('book.html'); out_dir=Path('assets/menu'); out_dir.mkdir(parents=True,exist_ok=True)
+          menu=menu_path.read_text(encoding='utf-8'); book=book_path.read_text(encoding='utf-8')
+          before_menu=len(menu.encode()); before_book=len(book.encode())
+          pattern=re.compile(r'data:image/(?P<fmt>png|jpeg|jpg|webp);base64,(?P<data>[A-Za-z0-9+/=]+)',re.I)
+          matches=list(pattern.finditer(menu)); uri_to_path={}; digest_to_path={}; created=[]
           for match in matches:
-              uri = match.group(0)
-              if uri in uri_to_path:
-                  continue
-              raw = base64.b64decode(match.group('data'))
-              digest = hashlib.sha256(raw).hexdigest()
-              if digest in digest_to_path:
-                  uri_to_path[uri] = digest_to_path[digest]
-                  continue
-              try:
-                  with Image.open(io.BytesIO(raw)) as im:
-                      im.load()
-                      has_alpha = im.mode in ('RGBA','LA') or ('transparency' in im.info)
-                      im = im.convert('RGBA' if has_alpha else 'RGB')
-                      if im.width > 1600 or im.height > 1200:
-                          im.thumbnail((1600, 1200), Image.Resampling.LANCZOS)
-                      name = f'menu-{len(created)+1:02d}-{digest[:8]}.webp'
-                      path = out_dir / name
-                      im.save(path, 'WEBP', quality=82, method=6)
-              except Exception as exc:
-                  print(f'Skipping unsupported embedded image: {exc}')
-                  continue
-              public_path = '/' + path.as_posix()
-              digest_to_path[digest] = public_path
-              uri_to_path[uri] = public_path
-              created.append(path)
-
-          for uri, public_path in uri_to_path.items():
-              menu = menu.replace(uri, public_path)
-
-          menu_css = '''\n<!-- hbl-brand-unification-v1 -->\n<style>\n/* Brand polish only: no menu text, prices, images, or ordering logic changed. */\n:root{--bg:#080706;--gold:#d9ab4a;--gold2:#f0c86d;--text:#f6f0e6;--muted:#d9cebf;--line:rgba(217,171,74,.72);--card:#11100f}\nbody{background:radial-gradient(circle at 15% 10%,rgba(217,171,74,.065),transparent 24%),radial-gradient(circle at 85% 12%,rgba(217,171,74,.05),transparent 18%),linear-gradient(180deg,#0b0a09 0%,#080706 100%)}\n.topbar{background:rgba(8,7,6,.96);border-bottom-color:rgba(217,171,74,.14)}\n.card{background:linear-gradient(180deg,#12110f,#0b0a09)}\n.bookTop,.cta a{background:linear-gradient(180deg,#f0c86d,#d9ab4a);color:#0b0907}\n.contactFooter{background:#080706}\n</style>\n'''
-          if 'hbl-brand-unification-v1' not in menu:
-              menu = menu.replace('</head>', menu_css + '</head>', 1)
-
-          book_css = '''\n<!-- hbl-brand-unification-v1 -->\n<style>\n/* Visual brand unification only: booking calculations and form behavior are untouched. */\n:root{--ink:#080706;--cream:#f6f0e6;--ember:#d65a2c;--gold:#d9ab4a;--muted:#d9cebf}\nbody,.bookPage{background:#080706}\n.nav{background:#080706}\n.navcta,.primary{background:#d9ab4a!important;color:#080706!important}\n.bookHero{background:radial-gradient(circle at 78% 10%,rgba(217,171,74,.18),transparent 35%),linear-gradient(135deg,#11100f,#1b140d)!important}\n.bookBody{background:#f6f0e6!important}\n.eyebrow{color:#f0c86d!important}\n.sideNote{border-left-color:#d9ab4a!important}\n.estimateNotice{border-left-color:#d65a2c!important}\n.submit{background:#080706!important}\n</style>\n'''
-          if 'hbl-brand-unification-v1' not in book:
-              book = book.replace('</head>', book_css + '</head>', 1)
-
-          menu_path.write_text(menu, encoding='utf-8')
-          book_path.write_text(book, encoding='utf-8')
-
-          after_menu = menu_path.stat().st_size
-          after_book = book_path.stat().st_size
-          assets_bytes = sum(p.stat().st_size for p in created)
-          print(f'Embedded image occurrences found: {len(matches)}')
-          print(f'Unique optimized assets created: {len(created)}')
-          print(f'Menu HTML: {before_menu:,} -> {after_menu:,} bytes')
-          print(f'Optimized menu assets total: {assets_bytes:,} bytes')
-          print(f'Book HTML: {before_book:,} -> {after_book:,} bytes')
-
-          # Guardrails use the current visible wording, not historical labels.
-          required_menu = ['$50', '$25', 'Chicken', 'Steak', 'Shrimp', 'Salmon', 'Edamame', 'Gyoza', 'Vege / Tofu', 'Fried Rice', 'Noodle', 'Extra Chicken', 'Extra Steak', 'Extra Shrimp', 'Extra Salmon', 'Scallop', 'Lobster Tail', 'Filet Mignon']
-          for token in required_menu:
-              assert token in menu, f'Missing menu token after optimization: {token}'
-          required_book = ["const proteins=['Chicken','Steak','Shrimp','Salmon']", 'function price()', 'booking@hibachibylin.com', 'Filet Mignon Upgrade']
-          for token in required_book:
-              assert token in book, f'Missing booking token after styling: {token}'
-          assert len(uri_to_path) == 6, f'Expected 6 current embedded menu images, found/extracted {len(uri_to_path)}.'
-          assert after_menu < 100_000, f'Menu HTML remained unexpectedly large: {after_menu}'
-          assert assets_bytes < 2_500_000, f'Optimized menu assets are unexpectedly large: {assets_bytes}'
+              uri=match.group(0)
+              if uri in uri_to_path: continue
+              raw=base64.b64decode(match.group('data')); digest=hashlib.sha256(raw).hexdigest()
+              if digest in digest_to_path: uri_to_path[uri]=digest_to_path[digest]; continue
+              with Image.open(io.BytesIO(raw)) as im:
+                  im.load(); has_alpha=im.mode in ('RGBA','LA') or ('transparency' in im.info); im=im.convert('RGBA' if has_alpha else 'RGB')
+                  if im.width>1600 or im.height>1200: im.thumbnail((1600,1200),Image.Resampling.LANCZOS)
+                  path=out_dir/f'menu-{len(created)+1:02d}-{digest[:8]}.webp'; im.save(path,'WEBP',quality=82,method=6)
+              public_path='/'+path.as_posix(); digest_to_path[digest]=public_path; uri_to_path[uri]=public_path; created.append(path)
+          for uri,public_path in uri_to_path.items(): menu=menu.replace(uri,public_path)
+          menu_css='''\n<!-- hbl-brand-unification-v1 -->\n<style>\n:root{--bg:#080706;--gold:#d9ab4a;--gold2:#f0c86d;--text:#f6f0e6;--muted:#d9cebf;--line:rgba(217,171,74,.72);--card:#11100f}\nbody{background:radial-gradient(circle at 15% 10%,rgba(217,171,74,.065),transparent 24%),radial-gradient(circle at 85% 12%,rgba(217,171,74,.05),transparent 18%),linear-gradient(180deg,#0b0a09 0%,#080706 100%)}\n.topbar{background:rgba(8,7,6,.96);border-bottom-color:rgba(217,171,74,.14)}\n.card{background:linear-gradient(180deg,#12110f,#0b0a09)}\n.bookTop,.cta a{background:linear-gradient(180deg,#f0c86d,#d9ab4a);color:#0b0907}\n.contactFooter{background:#080706}\n</style>\n'''
+          if 'hbl-brand-unification-v1' not in menu: menu=menu.replace('</head>',menu_css+'</head>',1)
+          book_css='''\n<!-- hbl-brand-unification-v1 -->\n<style>\n:root{--ink:#080706;--cream:#f6f0e6;--ember:#d65a2c;--gold:#d9ab4a;--muted:#d9cebf}\nbody,.bookPage{background:#080706}.nav{background:#080706}.navcta,.primary{background:#d9ab4a!important;color:#080706!important}\n.bookHero{background:radial-gradient(circle at 78% 10%,rgba(217,171,74,.18),transparent 35%),linear-gradient(135deg,#11100f,#1b140d)!important}\n.bookBody{background:#f6f0e6!important}.eyebrow{color:#f0c86d!important}.sideNote{border-left-color:#d9ab4a!important}.estimateNotice{border-left-color:#d65a2c!important}.submit{background:#080706!important}\n</style>\n'''
+          if 'hbl-brand-unification-v1' not in book: book=book.replace('</head>',book_css+'</head>',1)
+          menu_path.write_text(menu,encoding='utf-8'); book_path.write_text(book,encoding='utf-8')
+          after_menu=menu_path.stat().st_size; after_book=book_path.stat().st_size; assets_bytes=sum(p.stat().st_size for p in created)
+          print(f'Embedded image occurrences found: {len(matches)}'); print(f'Unique optimized assets created: {len(created)}'); print(f'Menu HTML: {before_menu:,} -> {after_menu:,} bytes'); print(f'Optimized menu assets total: {assets_bytes:,} bytes'); print(f'Book HTML: {before_book:,} -> {after_book:,} bytes')
+          required_menu=['$50','$25','Chicken','Steak','Shrimp','Salmon','Edamame','Gyoza','Vege / Tofu','Fried Rice','Noodle','Extra Chicken','Extra Steak','Extra Shrimp','Extra Salmon','Scallop','Lobster Tail','Filet Mignon']
+          for token in required_menu: assert token in menu,f'Missing menu token after optimization: {token}'
+          required_book=["const proteins=['Chicken','Steak','Shrimp','Salmon']",'function price()','booking@hibachibylin.com','Filet Mignon Upgrade']
+          for token in required_book: assert token in book,f'Missing booking token after styling: {token}'
+          assert len(uri_to_path)==6,f'Expected 6 current embedded menu images, got {len(uri_to_path)}'; assert after_menu<100_000; assert assets_bytes<2_500_000
           PY
       - name: Commit optimized files and remove one-time workflow
         shell: bash
