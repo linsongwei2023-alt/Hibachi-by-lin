@@ -95,13 +95,16 @@ jobs:
           print(f'Optimized menu assets total: {assets_bytes:,} bytes')
           print(f'Book HTML: {before_book:,} -> {after_book:,} bytes')
 
-          required_menu = ['$50', '$25', 'Extra Chicken', 'Extra Steak', 'Extra Filet Mignon', 'Extra Shrimp', 'Extra Salmon', 'Extra Scallop', 'Extra Lobster Tail']
+          # Guardrails use the current visible wording, not historical labels.
+          required_menu = ['$50', '$25', 'Chicken', 'Steak', 'Shrimp', 'Salmon', 'Edamame', 'Gyoza', 'Vege / Tofu', 'Fried Rice', 'Noodle', 'Extra Chicken', 'Extra Steak', 'Extra Shrimp', 'Extra Salmon', 'Scallop', 'Lobster Tail', 'Filet Mignon']
           for token in required_menu:
               assert token in menu, f'Missing menu token after optimization: {token}'
           required_book = ["const proteins=['Chicken','Steak','Shrimp','Salmon']", 'function price()', 'booking@hibachibylin.com', 'Filet Mignon Upgrade']
           for token in required_book:
               assert token in book, f'Missing booking token after styling: {token}'
-          assert len(uri_to_path) > 0, 'No embedded menu images were extracted; aborting rather than committing an unexpected result.'
+          assert len(uri_to_path) == 6, f'Expected 6 current embedded menu images, found/extracted {len(uri_to_path)}.'
+          assert after_menu < 100_000, f'Menu HTML remained unexpectedly large: {after_menu}'
+          assert assets_bytes < 2_500_000, f'Optimized menu assets are unexpectedly large: {assets_bytes}'
           PY
       - name: Commit optimized files and remove one-time workflow
         shell: bash
