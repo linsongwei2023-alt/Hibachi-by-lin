@@ -21,14 +21,12 @@
 .addressHelp{margin-top:6px;color:#766b5f;font-size:12px;line-height:1.45}
 .addressHelp.ok{color:#2f7a42}
 .addressHelp.warn{color:#9a6510}
-.addressAutocompleteHost{margin-top:0}
-.addressAutocompleteHost gmp-place-autocomplete{
-  display:block;
-  width:100%;
-  color:#222;
-  font-family:inherit;
-  font-size:16px;
-}
+.addressAutocompleteHost{position:relative;margin-top:0}
+.addressSuggestions{position:absolute;z-index:50;left:0;right:0;top:0;overflow:hidden;border:1px solid #d8c9ad;border-radius:0 0 8px 8px;background:#fff;box-shadow:0 12px 28px rgba(0,0,0,.16)}
+.addressSuggestions[hidden]{display:none}
+.addressSuggestion{display:block;width:100%;min-height:48px;padding:12px 14px;border:0;border-bottom:1px solid #eee6d8;background:#fff;color:#211b15;font:inherit;font-size:14px;line-height:1.35;text-align:left;touch-action:manipulation}
+.addressSuggestion:last-child{border-bottom:0}
+.addressSuggestion:active,.addressSuggestion:focus{background:#fff7e8;outline:2px solid #d7a531;outline-offset:-2px}
 .addressFallbackHidden{display:none!important}
 
 
@@ -63,8 +61,8 @@ function render(){if(new URLSearchParams(location.search).get('submitted')==='1'
  mount.innerHTML=`<form id="bookingForm" class="bookingCard" action="https://formsubmit.co/booking@hibachibylin.com" method="POST"><input type="hidden" name="_next" value="https://hibachibylin.com/book/?submitted=1"><input type="hidden" name="_subject" value="New Hibachi by Lin booking request"><input type="hidden" name="_cc" value="linsongwei2023@gmail.com"><input type="hidden" name="_template" value="basic"><input type="hidden" name="_captcha" value="false"><input id="replyto" type="hidden" name="_replyto"><input type="text" name="_honey" class="honeypot" tabindex="-1"><input id="quoteLink" type="hidden" name="OPEN QUOTE BUILDER — TAP OR COPY THIS LINK"><input id="chicagoTime" type="hidden" name="Submitted at Chicago time"><input type="hidden" name="Estimated food and add-ons total" value="$${t}"><input type="hidden" name="Adults" value="${adults}"><input type="hidden" name="Children age 4–12" value="${children}"><input type="hidden" name="Children age 3 and under" value="${toddlers}">${proteins.map(p=>`<input type="hidden" name="Adult ${p} protein servings" value="${adultP[p]||0}"><input type="hidden" name="Child ${p} protein servings" value="${childP[p]||0}">`).join('')}${extras.map(([n])=>`<input type="hidden" name="${n} orders" value="${extraC[n]||0}">`).join('')}<input type="hidden" name="Filet Mignon upgrades" value="${filetUpgrade}">
  <div class="formTop"><div><small>ESTIMATED FOOD & ADD-ONS</small><strong>$${t.toLocaleString()}</strong></div><span>No payment now</span></div>${adults*50+children*25<500?'<p class="minimum">$500 food minimum applied</p>':''}<p class="estimateNotice">Food estimate only. Travel and optional gratuity will appear in the itemized cash quote emailed before any deposit is requested.</p>
  <h3 class="formSection">1. Date & location</h3><div class="fieldRow"><label>Event date<input name="Event date" type="date" min="${chicagoTomorrow()}" required></label><label>Preferred time<select name="Preferred time" required><option value="" disabled selected>Select a time</option>${Array.from({length:14},(_,i)=>{const m=780+i*30,h24=Math.floor(m/60),mm=m%60,h=h24>12?h24-12:h24;return `<option value="${String(h24).padStart(2,'0')}:${String(mm).padStart(2,'0')}">${h}:${String(mm).padStart(2,'0')} PM</option>`}).join('')}</select></label></div><label>Service area<select name="Service area" required><option value="" disabled selected>Select your area</option>${cities.map(c=>`<option>${c}</option>`).join('')}</select></label><label>Full event address
-<div id="addressAutocompleteHost" class="addressAutocompleteHost"></div>
 <input name="Full event address" placeholder="Street, city, state, ZIP" required autocomplete="street-address" id="eventAddress" inputmode="text">
+<div id="addressAutocompleteHost" class="addressAutocompleteHost"></div>
 <div id="addressAutocompleteHelp" class="addressHelp">Start typing your full event address.</div>
 <input type="hidden" id="addressLat" name="Address latitude">
 <input type="hidden" id="addressLng" name="Address longitude">
@@ -91,6 +89,11 @@ render();
 (function(){
   const API_KEY = 'AIzaSyC8Z9RTM9IVKKZU9rGFdf19iyWQxYTfVog';
   let placesReady = false;
+  let AutocompleteSuggestion;
+  let AutocompleteSessionToken;
+  let sessionToken;
+  let addressTimer;
+  let addressRequest=0;
 
   function setAddressHelp(message, cls=''){
     const el=document.getElementById('addressAutocompleteHelp');
@@ -104,89 +107,83 @@ render();
     const fallback=document.getElementById('eventAddress');
     if(!host || !fallback) return;
 
-    // Before Google is ready, keep normal manual address entry available.
-    if(!placesReady){
-      fallback.classList.remove('addressFallbackHidden');
-      return;
-    }
+    fallback.classList.remove('addressFallbackHidden');
+    if(!placesReady || fallback.dataset.autocompleteBound==='1')return;
+    fallback.dataset.autocompleteBound='1';
+    fallback.setAttribute('aria-autocomplete','list');
+    fallback.setAttribute('aria-controls','addressSuggestions');
+    host.innerHTML='<div id="addressSuggestions" class="addressSuggestions" role="listbox" hidden></div>';
+    const list=host.querySelector('#addressSuggestions');
 
-    if(host.querySelector('gmp-place-autocomplete')) return;
+    const hideSuggestions=()=>{list.hidden=true;list.innerHTML=''};
+    const clearPlaceData=()=>{
+      fallback.dataset.googleValidated='';
+      ['addressLat','addressLng','addressPlaceId'].forEach(id=>{const el=document.getElementById(id);if(el)el.value=''});
+    };
 
-    try{
-      const {PlaceAutocompleteElement} = await google.maps.importLibrary('places');
-      const autocomplete = new PlaceAutocompleteElement({
-        includedRegionCodes:['us'],
-        placeholder:'Start typing your event address'
-      });
-
-      autocomplete.value = fallback.value || '';
-      autocomplete.setAttribute('aria-label','Full event address');
-      host.innerHTML='';
-      host.appendChild(autocomplete);
-
-      // Keep original input as the form field so existing booking/email logic stays unchanged.
-      fallback.classList.add('addressFallbackHidden');
-
-      const syncTypedValue=()=>{
-        fallback.value = autocomplete.value || '';
-        fallback.dataset.googleValidated='';
-        const lat=document.getElementById('addressLat');
-        const lng=document.getElementById('addressLng');
-        const pid=document.getElementById('addressPlaceId');
-        if(lat)lat.value='';
-        if(lng)lng.value='';
-        if(pid)pid.value='';
-      };
-      autocomplete.addEventListener('input',syncTypedValue);
-      autocomplete.addEventListener('change',syncTypedValue);
-
-      autocomplete.addEventListener('gmp-select', async (event)=>{
+    fallback.addEventListener('input',()=>{
+      clearPlaceData();
+      fallback.setCustomValidity('');
+      clearTimeout(addressTimer);
+      const input=fallback.value.trim();
+      if(input.length<3){hideSuggestions();setAddressHelp('Type at least 3 characters for address suggestions.');return}
+      addressTimer=setTimeout(async()=>{
+        const requestId=++addressRequest;
         try{
-          const prediction=event.placePrediction;
-          if(!prediction)return;
-          const place=prediction.toPlace();
-          await place.fetchFields({fields:['formattedAddress','location','id']});
-          const address=place.formattedAddress || autocomplete.value || '';
-          fallback.value=address;
-          autocomplete.value=address;
-
-          const loc=place.location;
-          const lat=document.getElementById('addressLat');
-          const lng=document.getElementById('addressLng');
-          const pid=document.getElementById('addressPlaceId');
-          if(lat)lat.value=loc?loc.lat():'';
-          if(lng)lng.value=loc?loc.lng():'';
-          if(pid)pid.value=place.id||'';
-          fallback.dataset.googleValidated='1';
-          setAddressHelp('Address selected ✓','ok');
+          sessionToken=sessionToken||new AutocompleteSessionToken();
+          const {suggestions}=await AutocompleteSuggestion.fetchAutocompleteSuggestions({input,includedRegionCodes:['us'],region:'us',language:'en-US',sessionToken});
+          if(requestId!==addressRequest)return;
+          list.innerHTML='';
+          suggestions.filter(item=>item.placePrediction).slice(0,5).forEach(item=>{
+            const prediction=item.placePrediction;
+            const button=document.createElement('button');
+            button.type='button';
+            button.className='addressSuggestion';
+            button.setAttribute('role','option');
+            button.textContent=prediction.text.toString();
+            button.addEventListener('click',async()=>{
+              try{
+                const place=prediction.toPlace();
+                await place.fetchFields({fields:['formattedAddress','location','id']});
+                fallback.value=place.formattedAddress||prediction.text.toString();
+                const loc=place.location;
+                const lat=document.getElementById('addressLat');
+                const lng=document.getElementById('addressLng');
+                const pid=document.getElementById('addressPlaceId');
+                if(lat)lat.value=loc?loc.lat():'';
+                if(lng)lng.value=loc?loc.lng():'';
+                if(pid)pid.value=place.id||'';
+                fallback.dataset.googleValidated='1';
+                sessionToken=null;
+                hideSuggestions();
+                setAddressHelp('Address selected ✓','ok');
+              }catch(err){
+                console.error('Address selection error',err);
+                hideSuggestions();
+                setAddressHelp('Please enter the full address manually.','warn');
+              }
+            });
+            list.appendChild(button);
+          });
+          list.hidden=!list.children.length;
+          setAddressHelp(list.children.length?'Choose your full address below.':'No address suggestions found. You can continue typing manually.',list.children.length?'':'warn');
         }catch(err){
-          console.error('Address selection error',err);
-          fallback.classList.remove('addressFallbackHidden');
-          setAddressHelp('Please enter the full address manually.','warn');
+          console.error('Google Places suggestion error',err);
+          hideSuggestions();
+          setAddressHelp('Google address suggestions are unavailable. You can still type the address manually.','warn');
         }
-      });
+      },250);
+    });
 
-      autocomplete.addEventListener('gmp-error',()=>{
-        console.error('Google Places request was denied');
-        host.innerHTML='';
-        fallback.classList.remove('addressFallbackHidden');
-        setAddressHelp('Google address suggestions are unavailable. You can still type the address manually.','warn');
-      });
-
-      setAddressHelp('Start typing and choose your full address from the Google suggestions.');
-    }catch(err){
-      console.error('Google Places widget error',err);
-      host.innerHTML='';
-      fallback.classList.remove('addressFallbackHidden');
-      setAddressHelp('Google address suggestions are unavailable. You can still type the address manually.','warn');
-    }
+    fallback.addEventListener('blur',()=>setTimeout(()=>{if(!host.contains(document.activeElement))hideSuggestions()},180));
+    setAddressHelp('Start typing and choose your full address from the Google suggestions.');
   }
 
   window.mountHibachiAddressAutocomplete=mountAddressWidget;
 
   window.initHibachiAddressAutocomplete=async function(){
     try{
-      await google.maps.importLibrary('places');
+      ({AutocompleteSuggestion,AutocompleteSessionToken}=await google.maps.importLibrary('places'));
       placesReady=true;
       await mountAddressWidget();
     }catch(err){
