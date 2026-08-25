@@ -1,0 +1,62 @@
+name: Add homepage hibachi video
+
+on:
+  push:
+    paths:
+      - '.video-trigger'
+
+permissions:
+  contents: write
+
+jobs:
+  build-home-video:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - name: Rebuild video and patch homepage
+        shell: bash
+        run: |
+          set -euo pipefail
+          mkdir -p assets
+          cat .video-parts/part-* | base64 -d > assets/hibachi-experience.mp4
+          python3 - <<'PY'
+          from pathlib import Path
+          p = Path('index.html')
+          s = p.read_text()
+          if 'class="experience"' not in s:
+              css = r'''
+.experience{padding:44px 18px 48px;background:linear-gradient(180deg,#080706 0%,#11100f 100%);border-top:1px solid rgba(217,171,74,.18);border-bottom:1px solid rgba(217,171,74,.18)}
+.experienceWrap{max-width:820px;margin:0 auto;text-align:center}.experienceEyebrow{margin:0 0 8px;color:var(--gold2);font-size:11px;font-weight:800;letter-spacing:.18em}.experienceTitle{margin:0;color:#fff;font:700 30px/1.08 Georgia,serif}.experienceSub{margin:10px auto 20px;max-width:560px;color:var(--muted);font-size:13px;line-height:1.55}.experienceVideo{width:min(100%,360px);margin:0 auto 22px;border:1px solid rgba(217,171,74,.55);border-radius:18px;overflow:hidden;background:#000;box-shadow:0 16px 42px rgba(0,0,0,.38)}.experienceVideo video{display:block;width:100%;height:auto;aspect-ratio:9/16;object-fit:cover;background:#000}.experienceCta{display:inline-flex;align-items:center;justify-content:center;min-height:48px;padding:0 26px;border:1px solid var(--gold);border-radius:999px;background:var(--gold);color:#080706;font-size:12px;font-weight:900;letter-spacing:.08em}.experienceCta:focus-visible{outline:2px solid #fff;outline-offset:3px}@media(min-width:760px){.experience{padding:58px 28px 62px}.experienceTitle{font-size:40px}.experienceSub{font-size:14px}.experienceVideo{width:390px}}
+'''
+              html = r'''
+<section class="experience" aria-labelledby="experience-title">
+  <div class="experienceWrap">
+    <p class="experienceEyebrow">THE HIBACHI EXPERIENCE</p>
+    <h2 class="experienceTitle" id="experience-title">More Than Dinner. It’s a Show. 🔥</h2>
+    <p class="experienceSub">Fire, food and fun — brought straight to your backyard.</p>
+    <div class="experienceVideo">
+      <video autoplay muted loop playsinline preload="metadata" aria-label="Hibachi by Lin private hibachi experience">
+        <source src="assets/hibachi-experience.mp4" type="video/mp4">
+      </video>
+    </div>
+    <a class="experienceCta" href="book.html">BOOK YOUR EVENT</a>
+  </div>
+</section>
+'''
+              if '</style>' not in s:
+                  raise SystemExit('style marker not found')
+              marker = '<section class="how" aria-labelledby="how-title">'
+              if marker not in s:
+                  raise SystemExit('How It Works marker not found')
+              s = s.replace('</style>', css + '\n</style>', 1)
+              s = s.replace(marker, html + '\n\n' + marker, 1)
+              p.write_text(s)
+          PY
+          rm -rf .video-parts .video-trigger .github/workflows/add-home-video.yml
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add -A
+          git commit -m "Add hibachi experience video to homepage [skip ci]"
+          git push
