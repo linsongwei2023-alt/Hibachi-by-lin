@@ -62,6 +62,9 @@ h1{margin:0;font:700 24px/1.14 Georgia,serif;letter-spacing:-.01em}
 .experienceCopy{margin:12px auto 25px;max-width:600px;color:var(--muted);font-size:14px;line-height:1.6}
 .experienceVideoFrame{width:min(100%,540px);margin:0 auto;overflow:hidden;border:1px solid rgba(217,171,74,.62);border-radius:16px;background:#050403;box-shadow:0 20px 50px rgba(0,0,0,.42),0 0 28px rgba(217,171,74,.08)}
 .experienceVideo{display:block;width:100%;height:auto;aspect-ratio:512/910;object-fit:cover;background:#050403}
+.experienceVideoFrame{position:relative}
+.experiencePlay{position:absolute;left:50%;top:50%;transform:translate(-50%,-50%);display:flex;align-items:center;justify-content:center;min-width:164px;height:54px;padding:0 22px;border:1px solid rgba(255,236,180,.82);border-radius:999px;background:rgba(7,6,5,.82);color:#f1c45d;font-size:14px;font-weight:900;letter-spacing:.08em;box-shadow:0 10px 32px rgba(0,0,0,.48);backdrop-filter:blur(5px);-webkit-backdrop-filter:blur(5px);z-index:2}
+.experiencePlay[hidden]{display:none}
 .experienceBook{display:flex;align-items:center;justify-content:center;width:min(100%,320px);height:56px;margin:24px auto 0;border-radius:3px;background:linear-gradient(180deg,#e7bb5a,#d7a140);color:#191209;font-size:14px;font-weight:900;letter-spacing:.06em}
 @media (min-width:760px){
   .experience{padding:62px 28px 68px}
@@ -177,7 +180,10 @@ h1{margin:0;font:700 24px/1.14 Georgia,serif;letter-spacing:-.01em}
     <h2 class="experienceTitle" id="experience-title">More Than Dinner. It’s a Show. 🔥</h2>
     <p class="experienceCopy">Fire, food and fun — brought straight to your backyard.</p>
     <div class="experienceVideoFrame">
-      <img class="experienceVideo" src="assets/hibachi-experience-poster.jpg" data-animation-src="assets/hibachi-experience-loop.gif" alt="Hibachi by Lin live cooking experience" width="320" height="568" decoding="async">
+      <video class="experienceVideo" muted playsinline preload="metadata" poster="assets/hibachi-experience-poster.jpg" aria-label="Hibachi by Lin live cooking experience">
+        <source src="assets/hibachi-experience-safari.mp4" type="video/mp4">
+      </video>
+      <button class="experiencePlay" type="button" aria-label="Play hibachi experience video">▶ PLAY VIDEO</button>
     </div>
     <a class="experienceBook" href="book.html">BOOK YOUR EVENT</a>
   </div>
@@ -273,25 +279,93 @@ h1{margin:0;font:700 24px/1.14 Georgia,serif;letter-spacing:-.01em}
 
 
 
+
+
 <script>
 (function () {
-  var display = document.querySelector('.experienceVideo[data-animation-src]');
-  if (!display) return;
+  var video = document.querySelector('.experienceVideo');
+  var playButton = document.querySelector('.experiencePlay');
+  if (!video || !playButton) return;
 
-  var animationSrc = display.getAttribute('data-animation-src');
+  var inView = false;
+  var userStarted = false;
+  var autoplayTried = false;
 
-  fetch(animationSrc, { cache: 'force-cache' })
-    .then(function (response) {
-      if (!response.ok) throw new Error('Animation download failed');
-      return response.blob();
-    })
-    .then(function (blob) {
-      display.src = URL.createObjectURL(blob);
-      display.removeAttribute('data-animation-src');
-    })
-    .catch(function () {
-      // Keep the poster visible if the animation cannot be downloaded.
-    });
+  video.muted = true;
+  video.defaultMuted = true;
+
+  function showPlayButton(label) {
+    playButton.textContent = label || '▶ PLAY VIDEO';
+    playButton.hidden = false;
+  }
+
+  function hidePlayButton() {
+    playButton.hidden = true;
+  }
+
+  function tryPlay(fromUser) {
+    if (fromUser) userStarted = true;
+    video.muted = true;
+    var promise = video.play();
+    if (promise && typeof promise.then === 'function') {
+      promise.then(hidePlayButton).catch(function () {
+        showPlayButton('▶ PLAY VIDEO');
+      });
+    }
+  }
+
+  playButton.addEventListener('click', function () {
+    if (video.ended) video.currentTime = 0;
+    tryPlay(true);
+  });
+
+  video.addEventListener('click', function () {
+    if (video.paused) {
+      tryPlay(true);
+    } else {
+      video.pause();
+    }
+  });
+
+  video.addEventListener('playing', hidePlayButton);
+  video.addEventListener('pause', function () {
+    if (inView && !video.ended) showPlayButton('▶ PLAY VIDEO');
+  });
+  video.addEventListener('ended', function () {
+    showPlayButton('↻ REPLAY VIDEO');
+  });
+  video.addEventListener('error', function () {
+    showPlayButton('▶ PLAY VIDEO');
+  });
+
+  if ('IntersectionObserver' in window) {
+    new IntersectionObserver(function (entries) {
+      var entry = entries[0];
+      inView = entry.isIntersecting && entry.intersectionRatio >= 0.25;
+
+      if (inView) {
+        if (userStarted) {
+          tryPlay(false);
+        } else if (!autoplayTried) {
+          autoplayTried = true;
+          tryPlay(false);
+        }
+      } else if (!video.paused) {
+        video.pause();
+      }
+    }, { threshold: [0, 0.25, 0.6] }).observe(video);
+  } else {
+    inView = true;
+    showPlayButton('▶ PLAY VIDEO');
+  }
+
+  document.addEventListener('visibilitychange', function () {
+    if (document.hidden) {
+      video.pause();
+    } else if (inView && userStarted) {
+      tryPlay(false);
+    }
+  });
 })();
 </script>
 </body>
