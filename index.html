@@ -177,9 +177,7 @@ h1{margin:0;font:700 24px/1.14 Georgia,serif;letter-spacing:-.01em}
     <h2 class="experienceTitle" id="experience-title">More Than Dinner. It’s a Show. 🔥</h2>
     <p class="experienceCopy">Fire, food and fun — brought straight to your backyard.</p>
     <div class="experienceVideoFrame">
-      <video class="experienceVideo" autoplay muted loop playsinline preload="auto" poster="assets/hibachi-experience-poster.jpg" aria-label="Hibachi by Lin live cooking experience">
-        <source src="assets/hibachi-experience-safari.mp4" type="video/mp4">
-      </video>
+      <img class="experienceVideo" src="assets/hibachi-experience-loop.webp" alt="Hibachi by Lin live cooking experience" width="360" height="640" loading="lazy" decoding="async">
     </div>
     <a class="experienceBook" href="book.html">BOOK YOUR EVENT</a>
   </div>
@@ -273,34 +271,6 @@ h1{margin:0;font:700 24px/1.14 Georgia,serif;letter-spacing:-.01em}
 </footer>
 
 
-<script>
-(function () {
-  var video = document.querySelector('.experienceVideo');
-  if (!video) return;
 
-  video.muted = true;
-  video.defaultMuted = true;
-
-  function resumeExperienceVideo() {
-    if (document.hidden) return;
-    var playAttempt = video.play();
-    if (playAttempt && typeof playAttempt.catch === 'function') {
-      playAttempt.catch(function () {
-        // A tap on the video provides a user-gesture fallback.
-      });
-    }
-  }
-
-  video.addEventListener('canplay', resumeExperienceVideo);
-  video.addEventListener('stalled', function () {
-    if (video.readyState < 3) video.load();
-  });
-  window.addEventListener('pageshow', resumeExperienceVideo);
-  document.addEventListener('visibilitychange', function () {
-    if (!document.hidden) resumeExperienceVideo();
-  });
-  video.addEventListener('click', resumeExperienceVideo);
-})();
-</script>
 </body>
 </html>
