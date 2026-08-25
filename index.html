@@ -278,10 +278,12 @@ h1{margin:0;font:700 24px/1.14 Georgia,serif;letter-spacing:-.01em}
   var video = document.querySelector('.experienceVideo');
   if (!video) return;
 
+  var isVisible = false;
   video.muted = true;
   video.defaultMuted = true;
 
   function startExperienceVideo() {
+    if (!isVisible || document.hidden) return;
     var playAttempt = video.play();
     if (playAttempt && typeof playAttempt.catch === 'function') {
       playAttempt.catch(function () {
@@ -290,17 +292,34 @@ h1{margin:0;font:700 24px/1.14 Georgia,serif;letter-spacing:-.01em}
     }
   }
 
-  if (video.readyState >= 2) {
-    startExperienceVideo();
+  if ('IntersectionObserver' in window) {
+    var observer = new IntersectionObserver(function (entries) {
+      isVisible = entries[0].isIntersecting && entries[0].intersectionRatio >= 0.2;
+      if (isVisible) {
+        startExperienceVideo();
+      } else {
+        video.pause();
+      }
+    }, { threshold: [0, 0.2, 0.5] });
+    observer.observe(video);
   } else {
-    video.addEventListener('loadeddata', startExperienceVideo, { once: true });
+    isVisible = true;
+    startExperienceVideo();
   }
 
+  video.addEventListener('loadeddata', startExperienceVideo);
   window.addEventListener('pageshow', startExperienceVideo);
   document.addEventListener('visibilitychange', function () {
-    if (!document.hidden) startExperienceVideo();
+    if (document.hidden) {
+      video.pause();
+    } else {
+      startExperienceVideo();
+    }
   });
-  video.addEventListener('click', startExperienceVideo);
+  video.addEventListener('click', function () {
+    isVisible = true;
+    startExperienceVideo();
+  });
 })();
 </script>
 </body>
