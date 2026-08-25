@@ -178,7 +178,7 @@ h1{margin:0;font:700 24px/1.14 Georgia,serif;letter-spacing:-.01em}
     <p class="experienceCopy">Fire, food and fun — brought straight to your backyard.</p>
     <div class="experienceVideoFrame">
       <video class="experienceVideo" autoplay muted loop playsinline preload="auto" poster="assets/hibachi-experience-poster.jpg" aria-label="Hibachi by Lin live cooking experience">
-        <source src="assets/hibachi-experience.mp4" type="video/mp4">
+        <source src="assets/hibachi-experience-safari.mp4" type="video/mp4">
       </video>
     </div>
     <a class="experienceBook" href="book.html">BOOK YOUR EVENT</a>
@@ -278,48 +278,28 @@ h1{margin:0;font:700 24px/1.14 Georgia,serif;letter-spacing:-.01em}
   var video = document.querySelector('.experienceVideo');
   if (!video) return;
 
-  var isVisible = false;
   video.muted = true;
   video.defaultMuted = true;
 
-  function startExperienceVideo() {
-    if (!isVisible || document.hidden) return;
+  function resumeExperienceVideo() {
+    if (document.hidden) return;
     var playAttempt = video.play();
     if (playAttempt && typeof playAttempt.catch === 'function') {
       playAttempt.catch(function () {
-        // Safari may block autoplay in Low Power Mode; the poster remains visible.
+        // A tap on the video provides a user-gesture fallback.
       });
     }
   }
 
-  if ('IntersectionObserver' in window) {
-    var observer = new IntersectionObserver(function (entries) {
-      isVisible = entries[0].isIntersecting && entries[0].intersectionRatio >= 0.2;
-      if (isVisible) {
-        startExperienceVideo();
-      } else {
-        video.pause();
-      }
-    }, { threshold: [0, 0.2, 0.5] });
-    observer.observe(video);
-  } else {
-    isVisible = true;
-    startExperienceVideo();
-  }
-
-  video.addEventListener('loadeddata', startExperienceVideo);
-  window.addEventListener('pageshow', startExperienceVideo);
+  video.addEventListener('canplay', resumeExperienceVideo);
+  video.addEventListener('stalled', function () {
+    if (video.readyState < 3) video.load();
+  });
+  window.addEventListener('pageshow', resumeExperienceVideo);
   document.addEventListener('visibilitychange', function () {
-    if (document.hidden) {
-      video.pause();
-    } else {
-      startExperienceVideo();
-    }
+    if (!document.hidden) resumeExperienceVideo();
   });
-  video.addEventListener('click', function () {
-    isVisible = true;
-    startExperienceVideo();
-  });
+  video.addEventListener('click', resumeExperienceVideo);
 })();
 </script>
 </body>
