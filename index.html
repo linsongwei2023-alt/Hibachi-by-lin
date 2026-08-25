@@ -177,7 +177,7 @@ h1{margin:0;font:700 24px/1.14 Georgia,serif;letter-spacing:-.01em}
     <h2 class="experienceTitle" id="experience-title">More Than Dinner. It’s a Show. 🔥</h2>
     <p class="experienceCopy">Fire, food and fun — brought straight to your backyard.</p>
     <div class="experienceVideoFrame">
-      <video class="experienceVideo" autoplay muted loop playsinline preload="metadata" aria-label="Hibachi by Lin live cooking experience">
+      <video class="experienceVideo" autoplay muted loop playsinline preload="auto" poster="assets/hibachi-experience-poster.jpg" aria-label="Hibachi by Lin live cooking experience">
         <source src="assets/hibachi-experience.mp4" type="video/mp4">
       </video>
     </div>
@@ -272,5 +272,36 @@ h1{margin:0;font:700 24px/1.14 Georgia,serif;letter-spacing:-.01em}
   <a href="mailto:booking@hibachibylin.com">booking@hibachibylin.com</a>
 </footer>
 
+
+<script>
+(function () {
+  var video = document.querySelector('.experienceVideo');
+  if (!video) return;
+
+  video.muted = true;
+  video.defaultMuted = true;
+
+  function startExperienceVideo() {
+    var playAttempt = video.play();
+    if (playAttempt && typeof playAttempt.catch === 'function') {
+      playAttempt.catch(function () {
+        // Safari may block autoplay in Low Power Mode; the poster remains visible.
+      });
+    }
+  }
+
+  if (video.readyState >= 2) {
+    startExperienceVideo();
+  } else {
+    video.addEventListener('loadeddata', startExperienceVideo, { once: true });
+  }
+
+  window.addEventListener('pageshow', startExperienceVideo);
+  document.addEventListener('visibilitychange', function () {
+    if (!document.hidden) startExperienceVideo();
+  });
+  video.addEventListener('click', startExperienceVideo);
+})();
+</script>
 </body>
 </html>
