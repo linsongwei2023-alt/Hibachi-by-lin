@@ -71,6 +71,21 @@ h1{margin:0;font:700 24px/1.14 Georgia,serif;letter-spacing:-.01em}
   .experienceBook{height:58px;font-size:15px}
 }
 
+.chefShow{background:linear-gradient(180deg,#080706 0%,#100d0a 50%,#080706 100%);border-top:1px solid rgba(217,171,74,.18);padding:44px 20px 50px}
+.chefShowWrap{max-width:980px;margin:0 auto;text-align:center}
+.chefShowEyebrow{margin:0 0 9px;color:var(--gold);font-size:13px;font-weight:900;letter-spacing:.18em}
+.chefShowTitle{margin:0;color:#fff;font:700 34px/1.08 Georgia,serif}
+.chefShowCopy{margin:12px auto 25px;max-width:620px;color:var(--muted);font-size:14px;line-height:1.6}
+.chefShowVideoFrame{width:min(100%,420px);margin:0 auto;overflow:hidden;border:1px solid rgba(217,171,74,.62);border-radius:16px;background:#050403;box-shadow:0 20px 50px rgba(0,0,0,.42),0 0 28px rgba(217,171,74,.08)}
+.chefShowVideo{display:block;width:100%;height:auto;aspect-ratio:512/910;object-fit:contain;background:#050403}
+.chefShowBook{display:flex;align-items:center;justify-content:center;width:min(100%,320px);height:56px;margin:24px auto 0;border-radius:3px;background:linear-gradient(180deg,#e7bb5a,#d7a140);color:#191209;font-size:14px;font-weight:900;letter-spacing:.04em}
+@media (min-width:760px){
+  .chefShow{padding:62px 28px 68px}
+  .chefShowTitle{font-size:46px}
+  .chefShowCopy{margin-top:14px;margin-bottom:30px;font-size:16px}
+  .chefShowBook{height:58px;font-size:15px}
+}
+
 .how{background:#0c0a08;border-top:1px solid rgba(217,171,74,.18);padding:40px 20px 46px}
 .howWrap{max-width:980px;margin:0 auto}
 .howEyebrow{margin:0 0 8px;color:var(--gold);font-size:13px;font-weight:900;letter-spacing:.18em;text-align:center}
@@ -183,6 +198,20 @@ h1{margin:0;font:700 24px/1.14 Georgia,serif;letter-spacing:-.01em}
       </video>
     </div>
     <a class="experienceBook" href="book.html">BOOK YOUR EVENT</a>
+  </div>
+</section>
+
+<section class="chefShow" aria-labelledby="chef-show-title">
+  <div class="chefShowWrap">
+    <p class="chefShowEyebrow">CHEF SHOW</p>
+    <h2 class="chefShowTitle" id="chef-show-title">More Than Dinner. It’s a Show.</h2>
+    <p class="chefShowCopy">Interactive hibachi entertainment brought right to your backyard.</p>
+    <div class="chefShowVideoFrame">
+      <video class="chefShowVideo" controls playsinline preload="metadata" poster="assets/chef-show-poster.jpg" aria-label="Hibachi by Lin chef show and interactive entertainment">
+        <source src="assets/chef-show.mp4" type="video/mp4">
+      </video>
+    </div>
+    <a class="chefShowBook" href="/book">Book Your Hibachi Party</a>
   </div>
 </section>
 
