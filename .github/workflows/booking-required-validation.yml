@@ -1,0 +1,109 @@
+name: Booking required validation
+on:
+  push:
+    paths:
+      - '.github/workflows/booking-required-validation.yml'
+permissions:
+  contents: write
+jobs:
+  update:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Strengthen booking validation
+        run: |
+          python - <<'PY'
+          from pathlib import Path
+          p=Path('book.html')
+          s=p.read_text()
+
+          # Let customers tap submit so incomplete protein selections can show a clear message.
+          s=s.replace("<button class=\"submit\" type=\"submit\" ${complete?'':'disabled'}>Send booking request →</button>","<button class=\"submit\" type=\"submit\">Send booking request →</button>")
+
+          marker='<!-- hbl-required-validation-v2 -->'
+          if marker not in s:
+              addon=r'''
+<!-- hbl-required-validation-v2 -->
+<style>
+.bookingValidationSummary{display:none;margin:0 0 16px;padding:13px 14px;border:1px solid #d65a2c;border-left:4px solid #d65a2c;background:rgba(214,90,44,.10);color:#fff;border-radius:4px;font-size:14px;line-height:1.45}
+.bookingValidationSummary.show{display:block}
+.bookingValidationSummary b{display:block;margin-bottom:4px;color:#f0c86d}
+.bookingCard input:invalid,.bookingCard select:invalid,.bookingCard textarea:invalid{border-color:#b85b43}
+</style>
+<script>
+(function(){
+  function proteinTotal(obj){return Object.values(obj||{}).reduce((n,v)=>n+(Number(v)||0),0)}
+  function ensureSummary(form){
+    let box=form.querySelector('.bookingValidationSummary');
+    if(!box){box=document.createElement('div');box.className='bookingValidationSummary';box.setAttribute('role','alert');form.insertBefore(box,form.firstChild)}
+    return box;
+  }
+  function setContactValidity(form){
+    const phone=form.querySelector('input[name="Customer phone number"]');
+    const email=form.querySelector('input[name="Customer email"]');
+    if(phone){
+      const digits=phone.value.replace(/\D/g,'');
+      const ten=digits.length===11&&digits.startsWith('1')?digits.slice(1):digits;
+      const ok=/^[2-9]\d{2}[2-9]\d{6}$/.test(ten);
+      phone.setCustomValidity(ok?'':'Please enter a valid U.S. phone number, for example (312) 555-1234.');
+    }
+    if(email){
+      const v=email.value.trim();
+      const ok=/^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/.test(v);
+      email.setCustomValidity(ok?'':'Please enter a valid email address, for example name@example.com.');
+    }
+  }
+  function validateAll(e){
+    const form=e.target.closest&&e.target.closest('#bookingForm');
+    if(!form)return;
+    setContactValidity(form);
+    const problems=[];
+    const aNeed=(Number(adults)||0)*2, aHave=proteinTotal(adultP);
+    const cNeed=Number(children)||0, cHave=proteinTotal(childP);
+    if(aHave!==aNeed)problems.push(`Adult proteins: please select exactly ${aNeed} servings (${aHave} selected).`);
+    if(cHave!==cNeed)problems.push(`Child proteins: please select exactly ${cNeed} serving${cNeed===1?'':'s'} (${cHave} selected).`);
+    const allergy=form.querySelector('#allergySelect'), details=form.querySelector('#allergyDetails');
+    if(allergy&&allergy.value==='Yes'&&details){details.required=true;if(!details.value.trim())problems.push('Please describe the food allergy.')}else if(details){details.required=false;details.setCustomValidity('')}
+    const required=[
+      ['input[name="Event date"]','Please select an event date.'],
+      ['select[name="Preferred time"]','Please select a preferred time.'],
+      ['select[name="Service area"]','Please select a service area.'],
+      ['input[name="Full event address"]','Please enter the full event address.'],
+      ['#allergySelect','Please select Yes or No for food allergies.'],
+      ['input[name="Customer name"]','Please enter your name.'],
+      ['input[name="Customer email"]','Please enter your email.'],
+      ['input[name="Customer phone number"]','Please enter your phone number.'],
+      ['label.confirm input[type="checkbox"]','Please check the confirmation box.']
+    ];
+    for(const [sel,msg] of required){const el=form.querySelector(sel);if(el&&((el.type==='checkbox'&&!el.checked)||(!el.value&&el.type!=='checkbox')))problems.push(msg)}
+    if(!form.checkValidity())problems.push('Please correct the highlighted field(s) before submitting.');
+    const box=ensureSummary(form);
+    if(problems.length){
+      e.preventDefault();e.stopImmediatePropagation();
+      const unique=[...new Set(problems)];
+      box.innerHTML='<b>Please complete your booking request:</b>'+unique.map(x=>`<div>• ${x}</div>`).join('');
+      box.classList.add('show');
+      const allocErr=form.querySelector('#allocErr');
+      if(allocErr&&(aHave!==aNeed||cHave!==cNeed)){allocErr.textContent='Please complete all included protein servings before submitting.';allocErr.classList.remove('hidden')}
+      box.scrollIntoView({behavior:'smooth',block:'center'});
+      setTimeout(()=>form.reportValidity(),250);
+    }else box.classList.remove('show');
+  }
+  document.addEventListener('submit',validateAll,true);
+  document.addEventListener('input',function(e){const f=e.target.closest&&e.target.closest('#bookingForm');if(f){setContactValidity(f);const b=f.querySelector('.bookingValidationSummary');if(b)b.classList.remove('show')}},true);
+  document.addEventListener('change',function(e){const f=e.target.closest&&e.target.closest('#bookingForm');if(f){const allergy=f.querySelector('#allergySelect'),details=f.querySelector('#allergyDetails');if(allergy&&details)details.required=allergy.value==='Yes';const b=f.querySelector('.bookingValidationSummary');if(b)b.classList.remove('show')}},true);
+})();
+</script>
+'''
+              s=s.replace('</body>',addon+'\n</body>')
+
+          p.write_text(s)
+          PY
+
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add book.html
+          git commit -m "Require complete booking fields with clear validation" || true
+          git rm .github/workflows/booking-required-validation.yml
+          git commit -m "Remove one-time booking validation workflow"
+          git push
