@@ -1,0 +1,133 @@
+name: Apply requested Hibachi pricing and protein updates
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - '.github/workflows/hbl-menu-protein-tax-update.yml'
+
+permissions:
+  contents: write
+
+jobs:
+  update:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - name: Apply targeted updates
+        shell: bash
+        run: |
+          python3 - <<'PY'
+          from pathlib import Path
+
+          def replace_once(text, old, new, label):
+              count = text.count(old)
+              if count != 1:
+                  raise SystemExit(f'{label}: expected 1 match, found {count}')
+              return text.replace(old, new, 1)
+
+          # MENU
+          p = Path('menu.html')
+          s = p.read_text()
+          s = replace_once(s,
+              '<div class="proteinBody"><strong>STEAK</strong><span>Grilled fresh</span><span class="filetUpgradeNote">Upgrade to Filet Mignon +$5 / portion</span></div>',
+              '<div class="proteinBody"><strong>STEAK</strong><span>Grilled fresh</span></div>',
+              'menu steak upgrade note')
+          s = replace_once(s,
+              '<div class="card rules"><p>✓ <b>Main protein options:</b> Chicken, Steak, Shrimp, Salmon.</p>',
+              '<div class="card rules"><p>✓ <b>Protein upgrades:</b> Upgrade to Filet Mignon +$5 / portion · Upgrade to Lobster Tail +$10 / portion.</p><p>✓ <b>Main protein options:</b> Chicken, Steak, Shrimp, Salmon.</p>',
+              'menu protein rules')
+          s = replace_once(s,
+              '<div class="row"><span>Extra Chicken</span><b>$7</b></div>',
+              '<div class="row"><span>Extra Chicken</span><b>$10</b></div>',
+              'menu extra chicken')
+          p.write_text(s)
+
+          # BOOKING
+          p = Path('book.html')
+          s = p.read_text()
+          s = replace_once(s,
+              "const proteins=['Chicken','Steak','Shrimp','Salmon'];",
+              "const proteins=['Chicken','Steak','Shrimp','Salmon','Upgrade to Filet Mignon +$5','Upgrade to Lobster Tail +$10'];",
+              'book protein list')
+          s = replace_once(s,
+              "['Extra Chicken',7]",
+              "['Extra Chicken',10]",
+              'book extra chicken')
+          s = replace_once(s,
+              "function price(){const food=adults*50+children*25;const x=extras.reduce((s,[n,p])=>s+(extraC[n]||0)*p,0);return Math.max(500,food)+x+filetUpgrade*5}",
+              "function price(){const food=adults*50+children*25;const x=extras.reduce((s,[n,p])=>s+(extraC[n]||0)*p,0);const u=((adultP['Upgrade to Filet Mignon +$5']||0)+(childP['Upgrade to Filet Mignon +$5']||0))*5+((adultP['Upgrade to Lobster Tail +$10']||0)+(childP['Upgrade to Lobster Tail +$10']||0))*10;return Math.max(500,food)+x+u}",
+              'book price function')
+          s = replace_once(s,
+              '<p class="proteinIntro">Divide the included servings among Chicken, Steak, Shrimp, and Salmon. The total cannot exceed the amount included for your guest count.</p>',
+              '<p class="proteinIntro">Choose from Chicken, Steak, Shrimp, Salmon, or a protein upgrade. Filet Mignon is +$5 per serving and Lobster Tail is +$10 per serving. Every upgrade counts as one protein serving toward the included total.</p>',
+              'book protein intro')
+          s = replace_once(s,
+              "${children?alloc('Child proteins','c',childP,children):''}${filetRow()}<div class=\"orderExample\">",
+              "${children?alloc('Child proteins','c',childP,children):''}<div class=\"orderExample\">",
+              'book remove separate filet selector')
+          s = replace_once(s,
+              '<input type="hidden" name="Filet Mignon upgrades" value="${filetUpgrade}">',
+              '',
+              'book remove legacy hidden filet field')
+          p.write_text(s)
+
+          # QUOTE / PRICE CALCULATOR
+          p = Path('quote.html')
+          s = p.read_text()
+          s = replace_once(s,
+              "const proteins=['Chicken','Steak','Shrimp','Salmon'];",
+              "const proteins=['Chicken','Steak','Shrimp','Salmon','Upgrade to Filet Mignon +$5','Upgrade to Lobster Tail +$10'];",
+              'quote protein list')
+          s = replace_once(s,
+              "['Extra Chicken',7]",
+              "['Extra Chicken',10]",
+              'quote extra chicken')
+          s = replace_once(s,
+              'TAX_RATE=.0825;',
+              'TAX_RATE=.1025;',
+              'quote tax rate')
+          old_calc = "function calc(){const food=Math.max(500,(+p.adults||0)*50+(+p.children||0)*25),addonsTotal=addons.reduce((s,[n,price])=>s+(p.extras?.[n]||0)*price,0),filetTotal=(+p.filetUpgrade||0)*5,x=addonsTotal+filetTotal,subtotal=food+x+(+travel||0),tax=subtotal*TAX_RATE,total=subtotal+tax,balance=Math.max(0,total-(+deposit||0));return{food,x,addonsTotal,filetTotal,subtotal,tax,total,balance}}"
+          new_calc = "function calc(){const food=Math.max(500,(+p.adults||0)*50+(+p.children||0)*25),addonsTotal=addons.reduce((s,[n,price])=>s+(p.extras?.[n]||0)*price,0),legacyFiletTotal=(+p.filetUpgrade||0)*5,proteinUpgradeTotal=((+p.adultProteins?.['Upgrade to Filet Mignon +$5']||0)+(+p.childProteins?.['Upgrade to Filet Mignon +$5']||0))*5+((+p.adultProteins?.['Upgrade to Lobster Tail +$10']||0)+(+p.childProteins?.['Upgrade to Lobster Tail +$10']||0))*10,x=addonsTotal+legacyFiletTotal+proteinUpgradeTotal,foodSubtotal=food+x,subtotal=foodSubtotal+(+travel||0),tax=subtotal*TAX_RATE,total=subtotal+tax,balance=Math.max(0,total-(+deposit||0));return{food,x,addonsTotal,filetTotal:legacyFiletTotal,proteinUpgradeTotal,foodSubtotal,subtotal,tax,total,balance}}"
+          s = replace_once(s, old_calc, new_calc, 'quote calculation')
+
+          old_preview = "<p><span>Tax (8.25%)</span><b>${money(c.tax)}</b></p><p class=\"grand\"><span>Total price (Cash Only)</span><b>${money(c.total)}</b></p><p><span>Deposit received</span><b>-${money(deposit)}</b></p><p><span>Balance due</span><b>${money(c.balance)}</b></p></div><div class=\"tips\"><b>Suggested gratuity</b>${[.2,.25,.3].map(r=>`<p><span>${r*100}% · ${money(c.total*r)}</span><strong>${money(c.balance+c.total*r)} after deposit</strong></p>`).join('')}</div><small>Cash total equals food, add-ons, travel, and 8.25% tax. Suggested gratuity is calculated from this total.</small>"
+          new_preview = "<p><span>Tax</span><b>${money(c.tax)}</b></p><p class=\"grand\"><span>Total price (Cash Only)</span><b>${money(c.total)}</b></p><p><span>Deposit received</span><b>-${money(deposit)}</b></p><p><span>Balance due</span><b>${money(c.balance)}</b></p></div><div class=\"tips\"><b>Suggested gratuity · based on food subtotal only</b>${[.2,.25,.3].map(r=>{const tip=c.foodSubtotal*r;return `<p><span>${r*100}% · ${money(tip)}</span><strong>${money(c.balance+tip)} after deposit</strong></p>`}).join('')}</div><small>Cash total equals food, add-ons, travel, and tax. Suggested gratuity is based on the food subtotal only and excludes travel fee and tax.</small>"
+          s = replace_once(s, old_preview, new_preview, 'quote preview tax and tips')
+
+          s = replace_once(s,
+              "menu('Tax (8.25%)','',money(m.tax));",
+              "menu('Tax','',money(m.tax));",
+              'quote image tax label')
+          s = replace_once(s,
+              "[.2,.25,.3].forEach(r=>menu(`${r*100}% tip`,money(m.total*r),`Final: ${money(m.balance+m.total*r)}`));",
+              "[.2,.25,.3].forEach(r=>{const tip=m.foodSubtotal*r;menu(`${r*100}% tip`,money(tip),`Final: ${money(m.balance+tip)}`)});",
+              'quote image tip calculation')
+          s = replace_once(s,
+              "x.fillText('Total cash price = food + add-ons + travel fee + 8.25% tax.',70,y);y+=34;x.fillText('Suggested gratuity is calculated from the total price. Deposit confirms the date.',70,y);",
+              "x.fillText('Total cash price = food + add-ons + travel fee + tax.',70,y);y+=34;x.fillText('Suggested gratuity is based on food subtotal only; travel and tax excluded.',70,y);",
+              'quote image footer note')
+          p.write_text(s)
+
+          # Basic post-change assertions
+          menu = Path('menu.html').read_text()
+          book = Path('book.html').read_text()
+          quote = Path('quote.html').read_text()
+          assert 'Extra Chicken</span><b>$10</b>' in menu
+          assert "['Extra Chicken',10]" in book and "['Extra Chicken',10]" in quote
+          assert 'Upgrade to Lobster Tail +$10' in menu and 'Upgrade to Lobster Tail +$10' in book
+          assert 'TAX_RATE=.1025' in quote and 'Tax (8.25%)' not in quote
+          assert 'based on food subtotal only' in quote
+          print('All requested targeted updates applied successfully.')
+          PY
+      - name: Commit requested changes and remove temporary workflow
+        shell: bash
+        run: |
+          rm -f .github/workflows/hbl-menu-protein-tax-update.yml
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add menu.html book.html quote.html .github/workflows/hbl-menu-protein-tax-update.yml
+          git commit -m "Update protein upgrades pricing tax and gratuity logic"
+          git push origin main
