@@ -20,6 +20,7 @@
     .card{background:rgba(18,16,14,.95);border:1px solid var(--line);border-radius:18px;padding:24px;box-shadow:0 24px 70px rgba(0,0,0,.28)}
     .step{margin-bottom:23px}
     .label{display:block;font-size:13px;font-weight:700;margin-bottom:9px;color:#fff}
+    .optional{font-weight:400;color:#8f877d;margin-left:5px}
     .hint{font-size:12px;color:var(--muted);line-height:1.5;margin:6px 0 0}
     input,textarea,select{width:100%;font:inherit;color:#fff;background:#0b0908;border:1px solid rgba(255,255,255,.15);border-radius:10px;padding:14px 13px;outline:none}
     input:focus,textarea:focus,select:focus{border-color:var(--gold);box-shadow:0 0 0 3px rgba(217,171,74,.12)}
@@ -30,6 +31,12 @@
     .star.on{color:var(--gold2);text-shadow:0 0 16px rgba(240,200,109,.15)}
     .star:active{transform:scale(.91)}
     .ratingText{text-align:center;font-size:12px;color:var(--muted);min-height:18px;margin-top:5px}
+    .uploadBox{border:1px dashed rgba(217,171,74,.42);border-radius:12px;background:#0d0b09;padding:14px}
+    .uploadRow+.uploadRow{margin-top:14px;padding-top:14px;border-top:1px solid rgba(255,255,255,.08)}
+    .uploadTitle{display:block;font-size:12px;font-weight:700;color:#e8dfd4;margin-bottom:8px}
+    input[type=file]{padding:10px;color:#bfb5a7;font-size:12px;background:#0a0807}
+    input[type=file]::file-selector-button{border:0;border-radius:8px;padding:9px 12px;margin-right:10px;background:#272019;color:#f1cb76;font-weight:700;cursor:pointer}
+    .fileError{display:none;color:#f1cb76;font-size:12px;line-height:1.5;margin:9px 0 0}
     .consent{display:flex;gap:10px;align-items:flex-start;padding:13px;border:1px solid var(--line);border-radius:10px;background:#0d0b09}
     .consent input{width:18px;height:18px;min-width:18px;margin:1px 0 0;accent-color:var(--gold)}
     .consent span{font-size:12px;color:#d2c8bb;line-height:1.5}
@@ -54,7 +61,7 @@
     </header>
 
     <section class="card" id="reviewCard">
-      <form action="https://formsubmit.co/booking@hibachibylin.com" method="POST" id="reviewForm">
+      <form action="https://formsubmit.co/booking@hibachibylin.com" method="POST" enctype="multipart/form-data" id="reviewForm">
         <input type="hidden" name="_subject" value="New Hibachi by Lin Customer Review">
         <input type="hidden" name="_template" value="table">
         <input type="hidden" name="_captcha" value="false">
@@ -104,14 +111,30 @@
         </div>
 
         <div class="step">
+          <span class="label">Share photos or a short video <span class="optional">Optional</span></span>
+          <div class="uploadBox">
+            <div class="uploadRow">
+              <label class="uploadTitle" for="photos">Add photos</label>
+              <input id="photos" name="Customer Photos" type="file" accept="image/*" multiple>
+            </div>
+            <div class="uploadRow">
+              <label class="uploadTitle" for="video">Add a short video</label>
+              <input id="video" name="Customer Video" type="file" accept="video/*">
+            </div>
+            <p class="hint">Photos and video are optional. All uploaded files together must be under 10 MB.</p>
+            <p class="fileError" id="fileError">Your selected files are over 10 MB total. Please remove a file or choose a shorter video.</p>
+          </div>
+        </div>
+
+        <div class="step">
           <label class="consent">
             <input type="checkbox" name="Permission to Share" value="Yes" required>
-            <span>I’m happy for Hibachi by Lin to share this review on its website and social media. Only my first name, city/suburb, event type, rating, and review may be shown.</span>
+            <span>I’m happy for Hibachi by Lin to share this review and any photos/video I upload on its website and social media. Only my first name, city/suburb, event type, rating, review, and submitted media may be shown.</span>
           </label>
         </div>
 
         <button class="submit" type="submit">Submit Review</button>
-        <p class="privacy">Your review is sent directly to Hibachi by Lin for review before anything is published.</p>
+        <p class="privacy">Your review and any uploaded media are sent directly to Hibachi by Lin for review before anything is published.</p>
       </form>
     </section>
 
@@ -130,15 +153,46 @@
       var ratingText=document.getElementById('ratingText');
       var stars=[].slice.call(document.querySelectorAll('.star'));
       var labels=['','Not great','Okay','Good','Great','Amazing'];
+      var photos=document.getElementById('photos');
+      var video=document.getElementById('video');
+      var fileError=document.getElementById('fileError');
+      var maxBytes=10*1024*1024;
+
       function setRating(value){
         ratingInput.value=String(value);
         stars.forEach(function(star){star.classList.toggle('on',Number(star.dataset.value)<=value);});
         ratingText.textContent=value+' / 5 · '+labels[value];
       }
+      function totalFileSize(){
+        var total=0;
+        [].slice.call(photos.files||[]).forEach(function(file){total+=file.size||0;});
+        [].slice.call(video.files||[]).forEach(function(file){total+=file.size||0;});
+        return total;
+      }
+      function validateFiles(){
+        var tooLarge=totalFileSize()>maxBytes;
+        fileError.style.display=tooLarge?'block':'none';
+        return !tooLarge;
+      }
+
       stars.forEach(function(star){star.addEventListener('click',function(){setRating(Number(star.dataset.value));});});
+      photos.addEventListener('change',validateFiles);
+      video.addEventListener('change',validateFiles);
+
       document.getElementById('reviewForm').addEventListener('submit',function(e){
-        if(!ratingInput.value){e.preventDefault();ratingText.textContent='Please choose a star rating first.';ratingText.style.color='#f1cb76';document.getElementById('stars').scrollIntoView({behavior:'smooth',block:'center'});}
+        if(!ratingInput.value){
+          e.preventDefault();
+          ratingText.textContent='Please choose a star rating first.';
+          ratingText.style.color='#f1cb76';
+          document.getElementById('stars').scrollIntoView({behavior:'smooth',block:'center'});
+          return;
+        }
+        if(!validateFiles()){
+          e.preventDefault();
+          fileError.scrollIntoView({behavior:'smooth',block:'center'});
+        }
       });
+
       var params=new URLSearchParams(location.search);
       if(params.get('submitted')==='1'){
         document.getElementById('reviewCard').style.display='none';
