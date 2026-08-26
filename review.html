@@ -1,0 +1,150 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+  <title>Leave a Review | Hibachi by Lin</title>
+  <meta name="description" content="Share your Hibachi by Lin experience. Leave a quick review after your hibachi party in Chicago and Chicagoland.">
+  <meta name="robots" content="noindex,follow">
+  <link rel="canonical" href="https://hibachibylin.com/review">
+  <style>
+    :root{--bg:#080706;--panel:#12100e;--gold:#d9ab4a;--gold2:#f1cb76;--text:#f7f1e7;--muted:#bfb5a7;--line:rgba(255,255,255,.12);--success:#dff5df}
+    *{box-sizing:border-box}
+    html{-webkit-text-size-adjust:100%;text-size-adjust:100%}
+    body{margin:0;min-height:100vh;background:radial-gradient(circle at top,#1a1510 0,#0b0907 38%,#080706 72%);color:var(--text);font-family:Arial,Helvetica,sans-serif;-webkit-font-smoothing:antialiased}
+    .page{width:min(680px,calc(100% - 32px));margin:0 auto;padding:34px 0 48px}
+    .brand{text-align:center;margin-bottom:28px}
+    .eyebrow{font-size:11px;letter-spacing:.22em;color:var(--gold2);font-weight:700}
+    h1{font-family:Georgia,'Times New Roman',serif;font-size:38px;line-height:1.08;margin:10px 0 10px;font-weight:500}
+    .intro{max-width:520px;margin:0 auto;color:var(--muted);font-size:15px;line-height:1.65}
+    .card{background:rgba(18,16,14,.95);border:1px solid var(--line);border-radius:18px;padding:24px;box-shadow:0 24px 70px rgba(0,0,0,.28)}
+    .step{margin-bottom:23px}
+    .label{display:block;font-size:13px;font-weight:700;margin-bottom:9px;color:#fff}
+    .hint{font-size:12px;color:var(--muted);line-height:1.5;margin:6px 0 0}
+    input,textarea,select{width:100%;font:inherit;color:#fff;background:#0b0908;border:1px solid rgba(255,255,255,.15);border-radius:10px;padding:14px 13px;outline:none}
+    input:focus,textarea:focus,select:focus{border-color:var(--gold);box-shadow:0 0 0 3px rgba(217,171,74,.12)}
+    textarea{min-height:155px;resize:vertical;line-height:1.55}
+    select{appearance:none;background-image:linear-gradient(45deg,transparent 50%,#c9c0b4 50%),linear-gradient(135deg,#c9c0b4 50%,transparent 50%);background-position:calc(100% - 18px) 19px,calc(100% - 13px) 19px;background-size:5px 5px,5px 5px;background-repeat:no-repeat}
+    .stars{display:flex;justify-content:center;gap:7px;padding:3px 0 5px}
+    .star{appearance:none;border:0;background:transparent;color:#665d53;font-size:44px;line-height:1;padding:0 2px;cursor:pointer;transition:transform .12s ease,color .12s ease}
+    .star.on{color:var(--gold2);text-shadow:0 0 16px rgba(240,200,109,.15)}
+    .star:active{transform:scale(.91)}
+    .ratingText{text-align:center;font-size:12px;color:var(--muted);min-height:18px;margin-top:5px}
+    .consent{display:flex;gap:10px;align-items:flex-start;padding:13px;border:1px solid var(--line);border-radius:10px;background:#0d0b09}
+    .consent input{width:18px;height:18px;min-width:18px;margin:1px 0 0;accent-color:var(--gold)}
+    .consent span{font-size:12px;color:#d2c8bb;line-height:1.5}
+    .submit{width:100%;border:0;border-radius:11px;padding:15px 18px;font-size:15px;font-weight:800;letter-spacing:.02em;background:linear-gradient(135deg,var(--gold),var(--gold2));color:#18110a;cursor:pointer}
+    .submit:active{transform:translateY(1px)}
+    .privacy{text-align:center;font-size:11px;color:#8f877d;margin:14px 0 0;line-height:1.5}
+    .thanks{display:none;text-align:center;background:rgba(20,28,19,.95);border:1px solid rgba(197,234,197,.25);border-radius:18px;padding:34px 24px}
+    .thanks .check{font-size:42px;margin-bottom:10px;color:#d9f1d6}
+    .thanks h2{font-family:Georgia,'Times New Roman',serif;font-weight:500;font-size:30px;margin:0 0 10px}
+    .thanks p{color:#cbd8c9;line-height:1.6;margin:0}
+    .footer{text-align:center;color:#7e766d;font-size:11px;margin-top:24px}
+    .honeypot{position:absolute!important;left:-9999px!important;opacity:0!important;pointer-events:none!important}
+    @media(max-width:520px){.page{width:min(100% - 22px,680px);padding-top:24px}h1{font-size:33px}.card{padding:19px 16px;border-radius:16px}.star{font-size:42px}}
+  </style>
+</head>
+<body>
+  <main class="page">
+    <header class="brand">
+      <div class="eyebrow">HIBACHI BY LIN</div>
+      <h1>How was your experience?</h1>
+      <p class="intro">Thank you for having us at your event. A quick review helps future guests know what to expect — it only takes about 30 seconds.</p>
+    </header>
+
+    <section class="card" id="reviewCard">
+      <form action="https://formsubmit.co/booking@hibachibylin.com" method="POST" id="reviewForm">
+        <input type="hidden" name="_subject" value="New Hibachi by Lin Customer Review">
+        <input type="hidden" name="_template" value="table">
+        <input type="hidden" name="_captcha" value="false">
+        <input type="hidden" name="_next" value="https://hibachibylin.com/review?submitted=1">
+        <input type="text" name="_honey" class="honeypot" tabindex="-1" autocomplete="off">
+        <input type="hidden" name="Rating" id="ratingInput" value="">
+
+        <div class="step">
+          <span class="label" style="text-align:center">How would you rate your experience?</span>
+          <div class="stars" id="stars" role="radiogroup" aria-label="Choose a rating from 1 to 5 stars">
+            <button class="star" type="button" data-value="1" aria-label="1 star">★</button>
+            <button class="star" type="button" data-value="2" aria-label="2 stars">★</button>
+            <button class="star" type="button" data-value="3" aria-label="3 stars">★</button>
+            <button class="star" type="button" data-value="4" aria-label="4 stars">★</button>
+            <button class="star" type="button" data-value="5" aria-label="5 stars">★</button>
+          </div>
+          <div class="ratingText" id="ratingText">Tap a star to rate us</div>
+        </div>
+
+        <div class="step">
+          <label class="label" for="name">First name</label>
+          <input id="name" name="First Name" type="text" maxlength="40" autocomplete="given-name" placeholder="e.g. Jessica" required>
+        </div>
+
+        <div class="step">
+          <label class="label" for="city">City / Suburb</label>
+          <input id="city" name="City or Suburb" type="text" maxlength="70" autocomplete="address-level2" placeholder="e.g. Chicago, Naperville" required>
+        </div>
+
+        <div class="step">
+          <label class="label" for="eventType">Event type</label>
+          <select id="eventType" name="Event Type" required>
+            <option value="" selected disabled>Choose one</option>
+            <option>Birthday Party</option>
+            <option>Backyard Party</option>
+            <option>Family Gathering</option>
+            <option>Graduation</option>
+            <option>Corporate / Work Event</option>
+            <option>Other Private Event</option>
+          </select>
+        </div>
+
+        <div class="step">
+          <label class="label" for="review">Your review</label>
+          <textarea id="review" name="Review" maxlength="1200" required placeholder="What did you enjoy most — the food, chef show, guest interaction, or overall experience?"></textarea>
+          <p class="hint">A few sentences is perfect. Write it in your own words.</p>
+        </div>
+
+        <div class="step">
+          <label class="consent">
+            <input type="checkbox" name="Permission to Share" value="Yes" required>
+            <span>I’m happy for Hibachi by Lin to share this review on its website and social media. Only my first name, city/suburb, event type, rating, and review may be shown.</span>
+          </label>
+        </div>
+
+        <button class="submit" type="submit">Submit Review</button>
+        <p class="privacy">Your review is sent directly to Hibachi by Lin for review before anything is published.</p>
+      </form>
+    </section>
+
+    <section class="thanks" id="thanksCard">
+      <div class="check">✓</div>
+      <h2>Thank you!</h2>
+      <p>Your review was submitted successfully. We really appreciate you taking a moment to share your experience.</p>
+    </section>
+
+    <div class="footer">Hibachi by Lin · Chicago &amp; surrounding areas</div>
+  </main>
+
+  <script>
+    (function(){
+      var ratingInput=document.getElementById('ratingInput');
+      var ratingText=document.getElementById('ratingText');
+      var stars=[].slice.call(document.querySelectorAll('.star'));
+      var labels=['','Not great','Okay','Good','Great','Amazing'];
+      function setRating(value){
+        ratingInput.value=String(value);
+        stars.forEach(function(star){star.classList.toggle('on',Number(star.dataset.value)<=value);});
+        ratingText.textContent=value+' / 5 · '+labels[value];
+      }
+      stars.forEach(function(star){star.addEventListener('click',function(){setRating(Number(star.dataset.value));});});
+      document.getElementById('reviewForm').addEventListener('submit',function(e){
+        if(!ratingInput.value){e.preventDefault();ratingText.textContent='Please choose a star rating first.';ratingText.style.color='#f1cb76';document.getElementById('stars').scrollIntoView({behavior:'smooth',block:'center'});}
+      });
+      var params=new URLSearchParams(location.search);
+      if(params.get('submitted')==='1'){
+        document.getElementById('reviewCard').style.display='none';
+        document.getElementById('thanksCard').style.display='block';
+      }
+    })();
+  </script>
+</body>
+</html>
