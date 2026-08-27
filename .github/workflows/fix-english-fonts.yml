@@ -1,0 +1,35 @@
+name: Fix English Notes fonts
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:
+permissions:
+  contents: write
+jobs:
+  fix:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - name: Restore and update English Notes branch
+        run: |
+          git fetch origin english-notes-coach-v2
+          git checkout english-notes-coach-v2
+          git checkout c487e113ac302db163edb14b0c6696d018838e2c^ -- english-notes-coach/index.html
+          python3 - <<'PY'
+          from pathlib import Path
+          p=Path('english-notes-coach/index.html')
+          s=p.read_text()
+          a=s.index('const fonts=[')
+          b=s.index('let st=',a)
+          new="""const fonts=[\n['Montserrat','Montserrat','Montserrat'],['Plus Jakarta Sans','Plus Jakarta Sans','Plus+Jakarta+Sans'],['Outfit','Outfit','Outfit'],['Figtree','Figtree','Figtree'],['Space Grotesk','Space Grotesk','Space+Grotesk'],['Sora','Sora','Sora'],['Urbanist','Urbanist','Urbanist'],['Instrument Sans','Instrument Sans','Instrument+Sans'],['IBM Plex Sans','IBM Plex Sans','IBM+Plex+Sans'],['Barlow','Barlow','Barlow'],['Libre Franklin','Libre Franklin','Libre+Franklin'],['Nunito Sans','Nunito Sans','Nunito+Sans'],['Mulish','Mulish','Mulish'],['Lexend','Lexend','Lexend'],['Josefin Sans','Josefin Sans','Josefin+Sans'],['Roboto Slab','Roboto Slab','Roboto+Slab'],['DM Serif Display','DM Serif Display','DM+Serif+Display'],['Instrument Serif','Instrument Serif','Instrument+Serif'],['Fraunces','Fraunces','Fraunces'],['Pacifico','Pacifico','Pacifico']];\n"""
+          s=s[:a]+new+s[b:]
+          s=s.replace("E.font.value=localStorage.getItem(FS)||'System';", "let savedFont=localStorage.getItem(FS);E.font.value=fonts.some(f=>f[0]===savedFont)?savedFont:'Montserrat';")
+          p.write_text(s)
+          PY
+          git config user.name github-actions
+          git config user.email github-actions@github.com
+          git add english-notes-coach/index.html
+          git commit -m "Refresh English Notes font choices"
+          git push origin english-notes-coach-v2
