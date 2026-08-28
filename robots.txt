@@ -3,4 +3,4 @@ Allow: /
 Disallow: /quote
 Disallow: /quote.html
 
-Sitemap: https://hibachibylin.com/sitemap.xml
+Sitemap: https://www.hibachibylin.com/sitemap.xml
