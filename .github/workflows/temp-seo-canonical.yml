@@ -1,0 +1,79 @@
+name: Temporary SEO Canonical Sync
+
+on:
+  push:
+    paths:
+      - '.github/workflows/temp-seo-canonical.yml'
+
+permissions:
+  contents: write
+
+jobs:
+  seo-sync:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - name: Sync canonical host and sitemap dates
+        run: |
+          python - <<'PY'
+          from pathlib import Path
+          import re
+
+          public_pages = [
+              'index.html',
+              'menu.html',
+              'book.html',
+              'hibachi-catering-chicago.html',
+              'hibachi-at-home-chicago.html',
+              'hibachi-birthday-party-chicago.html',
+              'areas-we-serve.html',
+          ]
+
+          for name in public_pages:
+              p = Path(name)
+              s = p.read_text()
+              s = re.sub(
+                  r'(<link rel="canonical" href=")https://hibachibylin\.com',
+                  r'\1https://www.hibachibylin.com',
+                  s,
+              )
+              s = re.sub(
+                  r'(<meta property="og:url" content=")https://hibachibylin\.com',
+                  r'\1https://www.hibachibylin.com',
+                  s,
+              )
+              p.write_text(s)
+
+          sitemap = Path('sitemap.xml')
+          s = sitemap.read_text().replace('https://hibachibylin.com/', 'https://www.hibachibylin.com/')
+
+          def set_lastmod(xml, loc, date):
+              pattern = rf'(<loc>{re.escape(loc)}</loc>)(?:\s*<lastmod>[^<]+</lastmod>)?'
+              return re.sub(pattern, rf'\1\n    <lastmod>{date}</lastmod>', xml, count=1)
+
+          today = '2026-08-27'
+          for loc in [
+              'https://www.hibachibylin.com/',
+              'https://www.hibachibylin.com/menu',
+              'https://www.hibachibylin.com/book',
+          ]:
+              s = set_lastmod(s, loc, today)
+          sitemap.write_text(s)
+
+          robots = Path('robots.txt')
+          r = robots.read_text().replace(
+              'Sitemap: https://hibachibylin.com/sitemap.xml',
+              'Sitemap: https://www.hibachibylin.com/sitemap.xml'
+          )
+          robots.write_text(r)
+          PY
+      - name: Commit SEO sync
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add index.html menu.html book.html hibachi-catering-chicago.html hibachi-at-home-chicago.html hibachi-birthday-party-chicago.html areas-we-serve.html sitemap.xml robots.txt
+          git diff --cached --quiet && exit 0
+          git commit -m "Sync canonical URLs and sitemap metadata"
+          git push origin main
