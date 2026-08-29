@@ -5,5 +5,23 @@
     { "source": "/book/", "destination": "/book.html" },
     { "source": "/quote", "destination": "/quote.html" },
     { "source": "/quote/", "destination": "/quote.html" }
+  ],
+  "headers": [
+    {
+      "source": "/areas-we-serve",
+      "headers": [{ "key": "Cache-Control", "value": "public, max-age=0, must-revalidate, no-transform" }]
+    },
+    {
+      "source": "/hibachi-catering-indiana",
+      "headers": [{ "key": "Cache-Control", "value": "public, max-age=0, must-revalidate, no-transform" }]
+    },
+    {
+      "source": "/hibachi-catering-michigan",
+      "headers": [{ "key": "Cache-Control", "value": "public, max-age=0, must-revalidate, no-transform" }]
+    },
+    {
+      "source": "/hibachi-catering-wisconsin",
+      "headers": [{ "key": "Cache-Control", "value": "public, max-age=0, must-revalidate, no-transform" }]
+    }
   ]
 }
