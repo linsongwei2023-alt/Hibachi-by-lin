@@ -9,23 +9,23 @@
   "headers": [
     {
       "source": "/",
-      "headers": [{ "key": "Cache-Control", "value": "public, max-age=0, must-revalidate, no-transform" }, { "key": "Content-Encoding", "value": "identity" }]
+      "headers": [{ "key": "Cache-Control", "value": "public, max-age=0, must-revalidate" }]
     },
     {
       "source": "/areas-we-serve",
-      "headers": [{ "key": "Cache-Control", "value": "public, max-age=0, must-revalidate, no-transform" }, { "key": "Content-Encoding", "value": "identity" }]
+      "headers": [{ "key": "Cache-Control", "value": "public, max-age=0, must-revalidate" }]
     },
     {
       "source": "/hibachi-catering-indiana",
-      "headers": [{ "key": "Cache-Control", "value": "public, max-age=0, must-revalidate, no-transform" }, { "key": "Content-Encoding", "value": "identity" }]
+      "headers": [{ "key": "Cache-Control", "value": "public, max-age=0, must-revalidate" }]
     },
     {
       "source": "/hibachi-catering-michigan",
-      "headers": [{ "key": "Cache-Control", "value": "public, max-age=0, must-revalidate, no-transform" }, { "key": "Content-Encoding", "value": "identity" }]
+      "headers": [{ "key": "Cache-Control", "value": "public, max-age=0, must-revalidate" }]
     },
     {
       "source": "/hibachi-catering-wisconsin",
-      "headers": [{ "key": "Cache-Control", "value": "public, max-age=0, must-revalidate, no-transform" }, { "key": "Content-Encoding", "value": "identity" }]
+      "headers": [{ "key": "Cache-Control", "value": "public, max-age=0, must-revalidate" }]
     }
   ]
 }
