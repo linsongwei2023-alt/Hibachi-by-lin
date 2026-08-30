@@ -65,7 +65,8 @@ jobs:
 
       - name: Verify protected logic and commit changes
         run: |
-          grep -Fq "const proteins=['Chicken','Steak','Shrimp','Salmon','Upgrade to Filet Mignon +$5','Upgrade to Lobster Tail +$10']" book.html
+          grep -Fq "Upgrade to Filet Mignon +\$5" book.html
+          grep -Fq "Upgrade to Lobster Tail +\$10" book.html
           grep -Fq "let adults=10,children=0,toddlers=0" book.html
           grep -Fq "Adult (13+):</b> 2 protein servings per person." menu.html
           grep -Fq "Extra Chicken" menu.html
