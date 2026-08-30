@@ -29,27 +29,11 @@ jobs:
 
           path = Path('index.html')
           text = path.read_text(encoding='utf-8')
-
           old_css = ".localSeo{background:#0a0908;border-top:1px solid rgba(217,171,74,.16);padding:34px 20px 38px}\n.localSeoWrap{max-width:820px;margin:0 auto;text-align:center}\n.localSeo .mini{margin:0 0 7px;color:var(--gold);font-size:12px;font-weight:900;letter-spacing:.17em}\n.localSeo h2{margin:0;color:#fff;font:700 27px/1.12 Georgia,serif}\n.localSeo p{margin:12px auto 0;max-width:680px;color:var(--muted);font-size:13px;line-height:1.65}\n.localSeo a{display:inline-block;margin-top:14px;color:var(--gold2);font-size:13px;font-weight:900;text-decoration:underline;text-underline-offset:4px}\n@media(min-width:760px){.localSeo{padding:46px 28px 50px}.localSeo h2{font-size:36px}.localSeo p{font-size:14px}}"
           new_css = ".localSeo{background:#0a0908;border-top:1px solid rgba(217,171,74,.16);padding:25px 20px 28px}\n.localSeoWrap{max-width:820px;margin:0 auto;text-align:center}\n.localSeo .mini{margin:0 0 6px;color:var(--gold);font-size:11px;font-weight:900;letter-spacing:.17em}\n.localSeo h2{margin:0;color:#fff;font:700 25px/1.12 Georgia,serif}\n.localSeo p{margin:8px auto 0;max-width:720px;color:var(--muted);font-size:13px;line-height:1.55}\n@media(min-width:760px){.localSeo{padding:32px 28px 36px}.localSeo h2{font-size:32px}.localSeo p{font-size:14px}}"
           text = replace_once(text, old_css, new_css, 'homepage local SEO CSS')
-
-          old_block = '''<section class="localSeo" aria-labelledby="local-seo-title">
-  <div class="localSeoWrap">
-    <p class="mini">CHICAGO HIBACHI CATERING</p>
-    <h2 id="local-seo-title">A Private Hibachi Chef at Your Home</h2>
-    <p>Hibachi by Lin brings mobile hibachi catering to homes, backyards, birthdays, family gatherings and private events across Chicago, Chicagoland and surrounding Midwest areas.</p>
-    <p><strong>Serving Chicago &amp; the Midwest</strong><br>Illinois · Indiana · Michigan · Wisconsin</p>
-    <a href="/areas-we-serve">EXPLORE OUR SERVICE AREAS →</a>
-  </div>
-</section>'''
-          new_block = '''<section class="localSeo" aria-labelledby="local-seo-title">
-  <div class="localSeoWrap">
-    <p class="mini">CHICAGO HIBACHI CATERING</p>
-    <h2 id="local-seo-title">Chicago Is Our Core Service Area</h2>
-    <p>We serve Chicago and Chicagoland, plus selected events in Indiana, Michigan, Wisconsin, Los Angeles and Florida based on date and availability.</p>
-  </div>
-</section>'''
+          old_block = '<section class="localSeo" aria-labelledby="local-seo-title">\n  <div class="localSeoWrap">\n    <p class="mini">CHICAGO HIBACHI CATERING</p>\n    <h2 id="local-seo-title">A Private Hibachi Chef at Your Home</h2>\n    <p>Hibachi by Lin brings mobile hibachi catering to homes, backyards, birthdays, family gatherings and private events across Chicago, Chicagoland and surrounding Midwest areas.</p>\n    <p><strong>Serving Chicago &amp; the Midwest</strong><br>Illinois · Indiana · Michigan · Wisconsin</p>\n    <a href="/areas-we-serve">EXPLORE OUR SERVICE AREAS →</a>\n  </div>\n</section>'
+          new_block = '<section class="localSeo" aria-labelledby="local-seo-title">\n  <div class="localSeoWrap">\n    <p class="mini">CHICAGO HIBACHI CATERING</p>\n    <h2 id="local-seo-title">Chicago Is Our Core Service Area</h2>\n    <p>We serve Chicago and Chicagoland, plus selected events in Indiana, Michigan, Wisconsin, Los Angeles and Florida based on date and availability.</p>\n  </div>\n</section>'
           text = replace_once(text, old_block, new_block, 'homepage local SEO block')
           text = replace_once(text, '.chefShow{background:linear-gradient(180deg,#080706 0%,#100d0a 50%,#080706 100%);border-top:1px solid rgba(217,171,74,.18);padding:44px 20px 50px}', '.chefShow{background:linear-gradient(180deg,#080706 0%,#100d0a 50%,#080706 100%);border-top:1px solid rgba(217,171,74,.18);padding:34px 20px 38px}', 'chef show mobile padding')
           text = replace_once(text, '.chefShowTitle{margin:0;color:#fff;font:700 34px/1.08 Georgia,serif}', '.chefShowTitle{margin:0;color:#fff;font:700 30px/1.08 Georgia,serif}', 'chef show title')
