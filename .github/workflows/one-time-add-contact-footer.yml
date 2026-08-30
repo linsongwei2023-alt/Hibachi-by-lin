@@ -1,0 +1,45 @@
+name: One-time booking contact footer
+
+on:
+  push:
+    paths:
+      - '.github/workflows/one-time-add-contact-footer.yml'
+
+permissions:
+  contents: write
+
+jobs:
+  update-booking-footer:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Add contact footer and remove workflow
+        run: |
+          python - <<'PY'
+          from pathlib import Path
+
+          path = Path('book.html')
+          text = path.read_text(encoding='utf-8')
+          marker = '<!-- hbl-contact-footer-v1 -->'
+          closing = '</body></html>'
+          footer = '''\n<!-- hbl-contact-footer-v1 -->\n<footer style="padding:32px 20px 38px;text-align:center;background:#080706;border-top:1px solid rgba(217,171,74,.22);color:#d9cebf;font:13px/1.55 Arial,sans-serif">\n  <p style="margin:0">Questions about your event? We’re happy to help.</p>\n  <a href="mailto:booking@hibachibylin.com" style="display:inline-block;margin-top:10px;color:#f0c86d;font-weight:800;text-decoration:none">booking@hibachibylin.com</a>\n</footer>\n'''
+
+          if marker not in text:
+              if closing not in text:
+                  raise SystemExit('book.html closing body marker not found')
+              text = text.replace(closing, footer + closing, 1)
+              path.write_text(text, encoding='utf-8')
+
+          Path('.github/workflows/one-time-add-contact-footer.yml').unlink()
+          PY
+
+      - name: Commit changes
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add -A
+          git commit -m "Add contact email to booking page footer"
+          git push
