@@ -14,24 +14,7 @@ jobs:
     steps:
       - uses: actions/checkout@v4
       - name: Remove Chicago-only homepage block
-        run: |
-          python - <<'PY'
-          from pathlib import Path
-          p = Path('index.html')
-          s = p.read_text()
-          block = '''<section class="localSeo" aria-labelledby="local-seo-title">
-  <div class="localSeoWrap">
-    <p class="mini">CHICAGO HIBACHI CATERING</p>
-    <h2 id="local-seo-title">Chicago Is Our Core Service Area</h2>
-    <p>We serve Chicago and Chicagoland, plus selected events in Indiana, Michigan, Wisconsin, Southern California and Florida based on date and availability.</p>
-  </div>
-</section>
-
-'''
-          if block not in s:
-              raise SystemExit('Target block not found; no changes made')
-          p.write_text(s.replace(block, '', 1))
-          PY
+        run: python -c "from pathlib import Path; import re; p=Path('index.html'); s=p.read_text(); n=re.sub(r'<section class=\"localSeo\" aria-labelledby=\"local-seo-title\">.*?</section>\s*', '', s, count=1, flags=re.S); assert n != s, 'Target block not found'; p.write_text(n)"
       - name: Commit change and remove one-time workflow
         run: |
           rm .github/workflows/remove-home-chicago-seo.yml
