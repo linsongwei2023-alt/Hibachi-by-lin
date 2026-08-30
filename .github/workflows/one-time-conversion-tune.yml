@@ -46,9 +46,9 @@ jobs:
 
           path = Path('menu.html')
           text = path.read_text(encoding='utf-8')
-          text = replace_once(text, '<title>Chicago Hibachi Catering Menu &amp; Pricing | Hibachi by Lin</title>', '<title>Mobile Hibachi Menu &amp; Pricing | Hibachi by Lin</title>', 'menu title')
+          text = replace_once(text, '<title>Chicago Hibachi Catering Menu & Pricing | Hibachi by Lin</title>', '<title>Mobile Hibachi Menu & Pricing | Hibachi by Lin</title>', 'menu title')
           text = replace_once(text, '<meta name="description" content="View our Chicago mobile hibachi catering menu and pricing, including chicken, steak, shrimp, salmon, appetizers and add-ons for private events.">', '<meta name="description" content="View Hibachi by Lin mobile hibachi menu and pricing, including chicken, steak, shrimp, salmon, appetizers, add-ons and protein upgrades for private events.">', 'menu description')
-          text = replace_once(text, '<meta property="og:title" content="Chicago Hibachi Catering Menu &amp; Pricing | Hibachi by Lin">', '<meta property="og:title" content="Mobile Hibachi Menu &amp; Pricing | Hibachi by Lin">', 'menu OG title')
+          text = replace_once(text, '<meta property="og:title" content="Chicago Hibachi Catering Menu & Pricing | Hibachi by Lin">', '<meta property="og:title" content="Mobile Hibachi Menu & Pricing | Hibachi by Lin">', 'menu OG title')
           text = replace_once(text, '<meta property="og:description" content="View our Chicago mobile hibachi catering menu and pricing for private hibachi events.">', '<meta property="og:description" content="View our mobile hibachi menu and pricing for private events.">', 'menu OG description')
           path.write_text(text, encoding='utf-8')
 
