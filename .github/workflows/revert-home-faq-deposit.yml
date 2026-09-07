@@ -1,0 +1,38 @@
+name: Temporary revert homepage deposit wording
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - '.github/workflows/revert-home-faq-deposit.yml'
+
+permissions:
+  contents: write
+
+jobs:
+  revert-faq:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: main
+      - name: Restore no-deposit payment FAQ
+        run: |
+          python3 - <<'PY'
+          from pathlib import Path
+          p = Path('index.html')
+          s = p.read_text()
+          old = 'After we confirm your event details and final quote, a $100 deposit is required to secure your booking. The remaining balance is due at the end of your event. Tax applies to every order. Your final quote will clearly show the food, add-ons, travel fee, tax, and total. Tax is not included when calculating suggested gratuity.'
+          new = 'After we confirm your event details and final quote, payment is due at the end of your event. Tax applies to every order. Your final quote will clearly show the food, add-ons, travel fee, tax, and total. Tax is not included when calculating suggested gratuity.'
+          if old not in s:
+              raise SystemExit('Expected deposit FAQ text not found; no changes made.')
+          p.write_text(s.replace(old, new, 1))
+          PY
+      - name: Commit change
+        run: |
+          git config user.name 'github-actions[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          git add index.html
+          git diff --cached --quiet && exit 0
+          git commit -m 'Restore homepage no-deposit payment wording'
+          git push origin main
