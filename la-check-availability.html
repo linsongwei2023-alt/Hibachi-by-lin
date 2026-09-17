@@ -47,7 +47,7 @@
         <label>City or ZIP<input name="City or ZIP" type="text" placeholder="Pasadena or 91101" autocomplete="postal-code" required></label>
         <label>Estimated guest count<input name="Estimated guest count" type="number" min="1" max="300" inputmode="numeric" placeholder="e.g. 15" required></label>
         <label>Your name<input id="customerName" name="Customer name" type="text" autocomplete="name" placeholder="Name" required></label>
-        <label>Phone<input id="customerPhone" name="Customer phone" type="tel" autocomplete="tel" inputmode="tel" placeholder="(213) 555-1234" required></label>
+        <label>Phone<input id="customerPhone" name="Customer phone" type="tel" autocomplete="tel" inputmode="tel" placeholder="213-555-1234" required></label>
         <label>Email<input id="email" name="Customer email" type="email" autocomplete="email" inputmode="email" placeholder="name@example.com" required></label>
       </div>
       <p class="fine">Travel fees vary by event location and will be confirmed before your booking is finalized. Submitting this form does not create a confirmed reservation.</p><div id="formError" class="error" role="alert"></div><button id="submitBtn" class="submit" type="submit">Check My Date</button>
@@ -62,11 +62,11 @@
   try{const parts=new Intl.DateTimeFormat('en-CA',{timeZone:'America/Los_Angeles',year:'numeric',month:'2-digit',day:'2-digit'}).formatToParts(new Date());const obj=Object.fromEntries(parts.map(x=>[x.type,x.value]));const base=new Date(Number(obj.year),Number(obj.month)-1,Number(obj.day));base.setDate(base.getDate()+1);date.min=`${base.getFullYear()}-${String(base.getMonth()+1).padStart(2,'0')}-${String(base.getDate()).padStart(2,'0')}`;}catch(e){}
   const map={utm_source:'utmSource',utm_medium:'utmMedium',utm_campaign:'utmCampaign',utm_term:'utmTerm',gclid:'gclid'};Object.entries(map).forEach(([q,id])=>{const el=document.getElementById(id);if(el)el.value=qs.get(q)||''});document.getElementById('landingUrl').value=location.href;
   function validateContact(){
-    const digits=phone.value.replace(/\D/g,''), ten=digits.length===11&&digits.startsWith('1')?digits.slice(1):digits, phoneOk=/^[2-9]\d{2}[2-9]\d{6}$/.test(ten);phone.setCustomValidity(phoneOk?'':'Please enter a valid U.S. phone number, for example (213) 555-1234.');
+    const digits=phone.value.replace(/\D/g,''), ten=digits.length===11&&digits.startsWith('1')?digits.slice(1):digits, phoneOk=/^[2-9]\d{2}[2-9]\d{6}$/.test(ten);phone.setCustomValidity(phoneOk?'':'Please enter a valid U.S. phone number, for example 213-555-1234.');
     const value=email.value.trim(), emailOk=/^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/.test(value);email.setCustomValidity(emailOk?'':'Please enter a valid email address, for example name@example.com.');
     return phoneOk&&emailOk;
   }
-  phone.addEventListener('input',()=>{phone.setCustomValidity('')});email.addEventListener('input',()=>{email.setCustomValidity('')});
+  phone.addEventListener('input',()=>{phone.setCustomValidity('');const digits=phone.value.replace(/\D/g,'').slice(0,10);if(digits.length>=7)phone.value=`${digits.slice(0,3)}-${digits.slice(3,6)}-${digits.slice(6,10)}`;else if(digits.length>=4)phone.value=`${digits.slice(0,3)}-${digits.slice(3)}`;else phone.value=digits});email.addEventListener('input',()=>{email.setCustomValidity('')});
   form.addEventListener('submit',async e=>{
     e.preventDefault();errorBox.classList.remove('show');errorBox.textContent='';validateContact();if(!form.reportValidity())return;
     btn.disabled=true;btn.textContent='Sending…';
