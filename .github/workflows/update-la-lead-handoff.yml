@@ -16,8 +16,8 @@ jobs:
           from pathlib import Path
           p=Path('book.html')
           book=p.read_text(encoding='utf-8')
-          old=" restoreDraft();toggleAllergyDetails();bind();if(window.bindBookingValidation)window.bindBookingValidation();if(window.mountHibachiAddressAutocomplete)setTimeout(window.mountHibachiAddressAutocomplete,0);}}"
-          new=" restoreDraft();applyLeadPrefill();toggleAllergyDetails();bind();if(window.bindBookingValidation)window.bindBookingValidation();if(window.mountHibachiAddressAutocomplete)setTimeout(window.mountHibachiAddressAutocomplete,0);}}"
+          old=" restoreDraft();toggleAllergyDetails();bind();if(window.bindBookingValidation)window.bindBookingValidation();if(window.mountHibachiAddressAutocomplete)setTimeout(window.mountHibachiAddressAutocomplete,0);}"
+          new=" restoreDraft();applyLeadPrefill();toggleAllergyDetails();bind();if(window.bindBookingValidation)window.bindBookingValidation();if(window.mountHibachiAddressAutocomplete)setTimeout(window.mountHibachiAddressAutocomplete,0);}"
           if old in book:
               book=book.replace(old,new,1)
           elif new not in book:
