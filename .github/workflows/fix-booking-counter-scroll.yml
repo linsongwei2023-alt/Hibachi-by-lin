@@ -1,5 +1,6 @@
 name: Fix booking counter scroll jump
 
+# Second push: workflow now exists on main, so this run can execute.
 on:
   push:
     branches: [main]
