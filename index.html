@@ -171,17 +171,6 @@ fbq('track','PageView');
 </script>
 <noscript><img height="1" width="1" style="display:none" src="https://www.facebook.com/tr?id=1043765108502206&ev=PageView&noscript=1"></noscript>
 <!-- End Meta Pixel Code -->
-<script>
-(function(){
-if(location.search.indexOf('pixeldebug=1')===-1)return;
-setTimeout(function(){
-var a=typeof window.fbq==='function';
-var b=false; var t=false;
-try{var rr=performance.getEntriesByType('resource');b=rr.some(function(x){return x.name.indexOf('fbevents.js')!==-1});t=rr.some(function(x){return x.name.indexOf('facebook.com/tr')!==-1})}catch(e){}
-var x=document.createElement('div');x.style.cssText='position:fixed;left:10px;right:10px;bottom:10px;z-index:999999;background:#111;color:white;padding:14px;border:2px solid #d4af37;border-radius:10px;font:14px Arial';x.innerHTML='PIXEL DEBUG<br>fbq: '+(a?'YES':'NO')+'<br>fbevents.js: '+(b?'LOADED':'NOT LOADED')+'<br>PageView /tr: '+(t?'SEEN':'NOT VISIBLE')+'<br>ID: 1043765108502206';document.body.appendChild(x)
-},1800)
-})();
-</script>
 </head>
 <body>
 <main class="hero">
