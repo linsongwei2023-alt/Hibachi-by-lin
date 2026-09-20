@@ -60,9 +60,7 @@ fbq('track','PageView');
 <script>
 const proteins=['Chicken','Steak','Shrimp','Salmon','Upgrade to Filet Mignon +$5','Upgrade to Lobster Tail +$10'];
 const extras=[['Edamame',5],['Gyoza (8pcs)',10],['Vege / Tofu',5],['Fried Rice',5],['Noodle',5],['Extra Chicken',10],['Extra Steak',10],['Extra Filet Mignon',15],['Extra Shrimp (6pcs)',10],['Extra Salmon',10],['Extra Scallop (6pcs)',10],['Extra Lobster Tail',15]];
-let pendingLead=null;
-try{if(new URLSearchParams(location.search).get('source')==='la-lead')pendingLead=JSON.parse(sessionStorage.getItem('hblLeadPrefill')||'null')}catch(e){}
-let adults=Number.isFinite(Number(pendingLead?.adults))?Math.max(0,Number(pendingLead.adults)):10,children=Number.isFinite(Number(pendingLead?.children))?Math.max(0,Number(pendingLead.children)):0,toddlers=0,adultP=Object.fromEntries(proteins.map(x=>[x,0])),childP=Object.fromEntries(proteins.map(x=>[x,0])),extraC=Object.fromEntries(extras.map(x=>[x[0],0])),filetUpgrade=0;
+let adults=10,children=0,toddlers=0,adultP=Object.fromEntries(proteins.map(x=>[x,0])),childP=Object.fromEntries(proteins.map(x=>[x,0])),extraC=Object.fromEntries(extras.map(x=>[x[0],0])),filetUpgrade=0;
 let formDraft={},confirmDraft=false;
 function captureDraft(){const f=document.getElementById('bookingForm');if(!f)return;formDraft={};f.querySelectorAll('input:not([type=hidden]),select,textarea').forEach(el=>{if(el.closest('.counter'))return;const k=el.name||el.id;if(!k)return;formDraft[k]=(el.type==='checkbox'||el.type==='radio')?el.checked:el.value});const c=f.querySelector('.confirm input');confirmDraft=!!(c&&c.checked)}
 function restoreDraft(){const f=document.getElementById('bookingForm');if(!f)return;for(const [k,v] of Object.entries(formDraft)){const el=f.elements.namedItem(k)||document.getElementById(k);if(!el||typeof el.value==='undefined')continue;if(el.type==='checkbox'||el.type==='radio')el.checked=!!v;else el.value=v}const c=f.querySelector('.confirm input');if(c)c.checked=confirmDraft}
@@ -83,7 +81,7 @@ function clampFilet(){filetUpgrade=Math.min(filetUpgrade,steakPortions())}
 function filetRow(){const max=steakPortions();if(max<=0)return '';return `<div class="filetUpgradeBox"><div><b>Filet Mignon Upgrade</b><small>Upgrade any Steak portion to Filet Mignon · +$5 per portion · Up to ${max} portions</small></div><div class="counter"><button type="button" data-g="filet" data-d="-1" ${filetUpgrade===0?'disabled':''}>−</button><span>${filetUpgrade}</span><button type="button" data-g="filet" data-d="1" ${filetUpgrade>=max?'disabled':''}>＋</button></div></div>`}
 
 function alloc(title,type,obj,limit){const tot=totalProtein(obj),rem=limit-tot;return `<section class="proteinAllocator"><div class="proteinHeader"><div><strong>${title}</strong><small>${limit} total serving${limit===1?'':'s'} included</small></div><b>${tot} / ${limit}</b></div>${proteins.map(p=>`<div class="proteinRow"><span>${p}</span><div class="counter"><button type="button" data-p="${type}|${p}" data-d="-1" ${(obj[p]||0)===0?'disabled':''}>−</button><strong>${obj[p]||0}</strong><button type="button" data-p="${type}|${p}" data-d="1" ${tot>=limit?'aria-disabled="true"':''}>＋</button></div></div>`).join('')}<p class="allocationStatus ${rem===0?'complete':''}">${rem===0?`All ${limit} serving${limit===1?'':'s'} selected.`:`Choose ${rem} more serving${rem===1?'':'s'}.`}</p></section>`}
-function render(){if(new URLSearchParams(location.search).get('submitted')==='1'){if(!sessionStorage.getItem('hblBookingTracked')){if(window.fbq)fbq('track','Schedule',{content_name:'Hibachi Booking Request'});window.dataLayer=window.dataLayer||[];window.dataLayer.push({event:'booking_submitted'});if(typeof window.gtag==='function')gtag('event','booking_submitted');if(typeof window.va==='function')va('event',{name:'booking_submitted'});sessionStorage.setItem('hblBookingTracked','1')}mount.innerHTML=`<div class="bookingCard success"><div>✓</div><h2>Request sent!</h2><p>Your request has been emailed to Hibachi by Lin. We will review it and contact you with the final itemized total.</p><a class="submit backLink" href="/book/">Send another request</a></div>`;return}
+function render(){if(new URLSearchParams(location.search).get('submitted')==='1'){if(window.fbq&&!sessionStorage.getItem('hblMetaLeadTracked')){fbq('track','Lead');sessionStorage.setItem('hblMetaLeadTracked','1')}mount.innerHTML=`<div class="bookingCard success"><div>✓</div><h2>Request sent!</h2><p>Your request has been emailed to Hibachi by Lin. We will review it and contact you with the final itemized total.</p><a class="submit backLink" href="/book/">Send another request</a></div>`;return}
  const ap=totalProtein(adultP),cp=totalProtein(childP),complete=ap===adults*2&&(children===0||cp===children),t=price();
  mount.innerHTML=`<form id="bookingForm" class="bookingCard" action="https://formsubmit.co/booking@hibachibylin.com" method="POST"><input type="hidden" name="_next" value="https://hibachibylin.com/book/?submitted=1"><input type="hidden" name="_subject" value="New Hibachi by Lin booking request"><input type="hidden" name="_cc" value="linsongwei2023@gmail.com"><input type="hidden" name="_template" value="basic"><input type="hidden" name="_captcha" value="false"><input id="replyto" type="hidden" name="_replyto"><input type="text" name="_honey" class="honeypot" tabindex="-1"><input id="quoteLink" type="hidden" name="OPEN QUOTE BUILDER — TAP OR COPY THIS LINK"><input id="chicagoTime" type="hidden" name="Submitted at Chicago time"><input type="hidden" name="Estimated food and add-ons total" value="$${t}"><input type="hidden" name="Adults" value="${adults}"><input type="hidden" name="Children age 4–12" value="${children}"><input type="hidden" name="Children age 3 and under" value="${toddlers}">${proteins.map(p=>`<input type="hidden" name="Adult ${p} protein servings" value="${adultP[p]||0}"><input type="hidden" name="Child ${p} protein servings" value="${childP[p]||0}">`).join('')}${extras.map(([n])=>`<input type="hidden" name="${n} orders" value="${extraC[n]||0}">`).join('')}
  <div class="formTop"><div><small>ESTIMATED FOOD & ADD-ONS</small><strong>$${t.toLocaleString()}</strong></div><span>No payment now</span></div>${adults*50+children*25<500?'<p class="minimum">$500 food minimum applied</p>':''}<p class="estimateNotice">Food estimate only. Your travel fee will be confirmed separately based on your event location and added to your final quote. Tax and optional gratuity will also appear in the final itemized quote.</p>
@@ -101,18 +99,17 @@ function render(){if(new URLSearchParams(location.search).get('submitted')==='1'
 function applyLeadPrefill(){
  const qs=new URLSearchParams(location.search);
  if(qs.get('source')!=='la-lead')return;
- const lead=pendingLead;
+ let lead=null;
+ try{lead=JSON.parse(sessionStorage.getItem('hblLeadPrefill')||'null')}catch(e){}
  if(!lead)return;
  const f=document.getElementById('bookingForm');
  if(!f)return;
  const set=(selector,value)=>{const el=f.querySelector(selector);if(el&&value){el.value=value;el.dispatchEvent(new Event('change',{bubbles:true}))}};
  set('input[name="Event date"]',lead.date);
  set('select[name="Preferred time"]',lead.time);
- set('input[name="Full event address"]',lead.location);
  set('input[name="Customer name"]',lead.name);
  set('input[name="Customer email"]',lead.email);
  set('input[name="Customer phone number"]',lead.phone);
- pendingLead=null;
  sessionStorage.removeItem('hblLeadPrefill');
 }
 function toggleAllergyDetails(){
