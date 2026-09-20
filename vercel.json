@@ -126,5 +126,18 @@
         }
       ]
     }
+  ],
+  "redirects": [
+    {
+      "source": "/:path*",
+      "has": [
+        {
+          "type": "host",
+          "value": "hibachibylin.com"
+        }
+      ],
+      "destination": "https://www.hibachibylin.com/:path*",
+      "permanent": true
+    }
   ]
 }
