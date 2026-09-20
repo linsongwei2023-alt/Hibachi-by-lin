@@ -4,9 +4,7 @@
     { "source": "/book", "destination": "/book.html" },
     { "source": "/book/", "destination": "/book.html" },
     { "source": "/quote", "destination": "/quote.html" },
-    { "source": "/quote/", "destination": "/quote.html" },
-    { "source": "/la-check-availability", "destination": "/la-check-availability.html" },
-    { "source": "/la-check-availability/", "destination": "/la-check-availability.html" }
+    { "source": "/quote/", "destination": "/quote.html" }
   ],
   "headers": [
     {
