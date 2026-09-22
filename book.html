@@ -1,5 +1,5 @@
 <!doctype html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Book Mobile Hibachi Catering | Hibachi by Lin</title>
-<meta name="description" content="Book Hibachi by Lin for a private mobile hibachi event. Choose your date, enter your full event address, guest count, proteins and add-ons, then send your booking request.">
+<meta name="description" content="Check availability for Hibachi by Lin. Start with your date, location and contact info, then choose your menu now or finalize it later. No deposit or online payment required.">
 <meta name="robots" content="index,follow,max-image-preview:large">
 <link rel="canonical" href="https://www.hibachibylin.com/book">
 <meta property="og:type" content="website">
@@ -179,7 +179,7 @@ function stableCounterRender(anchor){
 }
 function bind(){
  const allergySelect=document.getElementById('allergySelect');if(allergySelect)allergySelect.onchange=toggleAllergyDetails;
- const menuBox=document.getElementById('menuLater');if(menuBox)menuBox.onchange=()=>{captureDraft();menuLater=menuBox.checked;render()};
+ const menuBox=document.getElementById('menuLater');if(menuBox)menuBox.onchange=()=>{captureDraft();menuLater=menuBox.checked;if(menuLater){proteins.forEach(p=>{adultP[p]=0;childP[p]=0});filetUpgrade=0}render()};
  document.querySelectorAll('.counter').forEach(c=>c.ondblclick=e=>e.preventDefault());
  document.querySelectorAll('[data-g]').forEach(b=>b.onclick=()=>{captureDraft();const k=b.dataset.g,d=Number(b.dataset.d);if(k==='adults'){adults=Math.max(0,adults+d);clamp(adultP,adults*2);clampFilet()}else if(k==='children'){children=Math.max(0,children+d);clamp(childP,children);clampFilet()}else if(k==='toddlers')toddlers=Math.max(0,toddlers+d);else if(k==='filet'){const max=steakPortions();filetUpgrade=Math.max(0,Math.min(max,filetUpgrade+d))}else if(k.startsWith('extra:')){const n=k.slice(6);extraC[n]=Math.max(0,(extraC[n]||0)+d)}stableCounterRender(b)});
  document.querySelectorAll('[data-p]').forEach(b=>b.onclick=()=>{captureDraft();const [type,n]=b.dataset.p.split('|'),d=Number(b.dataset.d),obj=type==='a'?adultP:childP,limit=type==='a'?adults*2:children;if(d>0&&totalProtein(obj)>=limit)return;obj[n]=Math.max(0,(obj[n]||0)+d);if(n==='Steak')clampFilet();stableCounterRender(b)});
