@@ -87,6 +87,7 @@ function stepProgress(){return `<div class="bookingSteps"><div class="bookingSte
 function summaryStrip(){const d=formDraft['Event date']||'Not set',t=formDraft['Preferred time']||'Not set',z=formDraft['City or ZIP']||'Not set';return `<div class="summaryStrip"><div><small>Date</small><strong>${esc(d)}</strong></div><div><small>Time</small><strong>${esc(t)}</strong></div><div><small>Area</small><strong>${esc(z)}</strong></div></div>`}
 function hiddenPrior(includeContact=false){let h=`<input type="hidden" name="Event date" value="${esc(formDraft['Event date'])}"><input type="hidden" name="Preferred time" value="${esc(formDraft['Preferred time'])}"><input type="hidden" name="City or ZIP" value="${esc(formDraft['City or ZIP'])}">`;if(includeContact)h+=`<input type="hidden" name="Customer name" value="${esc(formDraft['Customer name'])}"><input type="hidden" name="Customer email" value="${esc(formDraft['Customer email'])}"><input type="hidden" name="Customer phone number" value="${esc(formDraft['Customer phone number'])}">`;return h}
 function currentLeadKey(){return [formDraft['Event date']||'',formDraft['Customer email']||'',formDraft['Customer phone number']||''].join('|').toLowerCase()}
+function pushTrackingEvent(name,detail={}){window.dataLayer=window.dataLayer||[];window.dataLayer.push({event:name,...detail})}
 async function sendEarlyLead(){
  const key=currentLeadKey(); if(!key.replace(/\|/g,''))return false;
  if(sessionStorage.getItem('hblLeadSent:'+key)==='1'){sessionStorage.setItem('hblCurrentLeadKey',key);return true}
@@ -113,6 +114,7 @@ async function sendEarlyLead(){
    if(!res.ok)throw new Error('lead submit failed');
    sessionStorage.setItem('hblLeadSent:'+key,'1');sessionStorage.setItem('hblCurrentLeadKey',key);
    if(window.fbq)fbq('track','Lead');
+   pushTrackingEvent('hbl_lead',{lead_type:'availability',currency:'USD',value:Math.max(500,adults*50+children*25),source:new URLSearchParams(location.search).get('source')||'website'});
    return true;
  }catch(e){return false}
 }
@@ -123,6 +125,10 @@ function render(){
    if(window.fbq){
      if(!key||sessionStorage.getItem('hblLeadSent:'+key)!=='1')fbq('track','Lead');
      fbq('trackCustom','BookingRequest');
+   }
+   if(sessionStorage.getItem('hblBookingRequestTracked')!=='1'){
+     pushTrackingEvent('hbl_booking_request',{currency:'USD'});
+     sessionStorage.setItem('hblBookingRequestTracked','1');
    }
    mount.innerHTML=`<div class="bookingCard success"><div>✓</div><h2>Request sent!</h2><p>Your booking request has been emailed to Hibachi by Lin. We’ll review the date, travel fee and final itemized quote, then contact you to confirm.</p><a class="submit backLink" href="/book/">Send another request</a></div>`;return
  }
