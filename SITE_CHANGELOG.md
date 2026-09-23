@@ -4,6 +4,8 @@ This file records maintenance milestones. Git history remains the detailed, auth
 
 ## 2026-09-22
 
+- Added neutral `hbl_lead` and `hbl_booking_request` dataLayer events on the booking flow so Google Ads / GTM can map conversions without changing the customer experience.
+- Created restore branch `backup/2026-09-22-pre-google-tracking-hook` before this tracking change.
 - Created restore branch `backup/2026-09-22-pre-booking-flow` before changing the live booking experience.
 - Reworked `/book` into a three-step flow: date/area/guest count → contact capture → menu/final request.
 - Website Lead is now captured after the customer provides date + contact information; the full booking request remains a separate final step.
