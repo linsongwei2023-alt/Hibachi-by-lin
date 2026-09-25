@@ -20,3 +20,4 @@ if 'aria-labelledby="reviews-title"' not in s:
     if marker not in s: raise SystemExit('how section marker not found')
     s=s.replace(marker,html+marker,1)
 p.write_text(s,encoding='utf-8')
+# Triggered after the workflow exists so the homepage update runs automatically.
