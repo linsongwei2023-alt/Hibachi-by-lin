@@ -9,6 +9,7 @@ This file records maintenance milestones. Git history remains the detailed, auth
 - Added internal links from the San Francisco Bay Area hub and California service page to the new city pages.
 - Added the new Bay Area city URLs to the sitemap.
 - Created restore branch `backup/2026-09-25-pre-home-included-bay-area-seo` before these changes.
+- Production merge commit: `25ffbac736277b615abffd057380cf562dff7daf` (PR #11).
 
 ## 2026-09-22
 
