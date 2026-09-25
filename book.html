@@ -84,8 +84,8 @@ function filetRow(){const max=steakPortions();if(max<=0)return '';return `<div c
 
 function esc(v){return String(v??'').replace(/[&<>"']/g,m=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[m]))}
 function stepProgress(){return `<div class="bookingSteps"><div class="bookingStep ${bookingStep===1?'active':bookingStep>1?'done':''}">1 · Date & guests</div><div class="bookingStep ${bookingStep===2?'active':bookingStep>2?'done':''}">2 · Contact</div><div class="bookingStep ${bookingStep===3?'active':''}">3 · Menu & request</div></div>`}
-function summaryStrip(){const d=formDraft['Event date']||'Not set',t=formDraft['Preferred time']||'Not set',z=formDraft['City or ZIP']||'Not set';return `<div class="summaryStrip"><div><small>Date</small><strong>${esc(d)}</strong></div><div><small>Time</small><strong>${esc(t)}</strong></div><div><small>Area</small><strong>${esc(z)}</strong></div></div>`}
-function hiddenPrior(includeContact=false){let h=`<input type="hidden" name="Event date" value="${esc(formDraft['Event date'])}"><input type="hidden" name="Preferred time" value="${esc(formDraft['Preferred time'])}"><input type="hidden" name="City or ZIP" value="${esc(formDraft['City or ZIP'])}">`;if(includeContact)h+=`<input type="hidden" name="Customer name" value="${esc(formDraft['Customer name'])}"><input type="hidden" name="Customer email" value="${esc(formDraft['Customer email'])}"><input type="hidden" name="Customer phone number" value="${esc(formDraft['Customer phone number'])}">`;return h}
+function summaryStrip(){const d=formDraft['Event date']||'Not set',t=formDraft['Preferred time']||'Not set',city=formDraft['Event city']||'',state=formDraft['Event state']||'',zip=formDraft['Event ZIP']||'',z=[city,state,zip].filter(Boolean).join(', ')||'Not set';return `<div class="summaryStrip"><div><small>Date</small><strong>${esc(d)}</strong></div><div><small>Time</small><strong>${esc(t)}</strong></div><div><small>Area</small><strong>${esc(z)}</strong></div></div>`}
+function hiddenPrior(includeContact=false){let h=`<input type="hidden" name="Event date" value="${esc(formDraft['Event date'])}"><input type="hidden" name="Preferred time" value="${esc(formDraft['Preferred time'])}"><input type="hidden" name="Street address" value="${esc(formDraft['Street address'])}"><input type="hidden" name="Event city" value="${esc(formDraft['Event city'])}"><input type="hidden" name="Event state" value="${esc(formDraft['Event state'])}"><input type="hidden" name="Event ZIP" value="${esc(formDraft['Event ZIP'])}">`;if(includeContact)h+=`<input type="hidden" name="Customer name" value="${esc(formDraft['Customer name'])}"><input type="hidden" name="Customer email" value="${esc(formDraft['Customer email'])}"><input type="hidden" name="Customer phone number" value="${esc(formDraft['Customer phone number'])}">`;return h}
 function currentLeadKey(){return [formDraft['Event date']||'',formDraft['Customer email']||'',formDraft['Customer phone number']||''].join('|').toLowerCase()}
 function pushTrackingEvent(name,detail={}){window.dataLayer=window.dataLayer||[];window.dataLayer.push({event:name,...detail})}
 async function sendEarlyLead(){
@@ -101,7 +101,10 @@ async function sendEarlyLead(){
  fd.append('Lead source',new URLSearchParams(location.search).get('source')||document.referrer||'Website');
  fd.append('Event date',formDraft['Event date']||'');
  fd.append('Preferred time',formDraft['Preferred time']||'');
- fd.append('City or ZIP',formDraft['City or ZIP']||'');
+ fd.append('Street address',formDraft['Street address']||'');
+ fd.append('Event city',formDraft['Event city']||'');
+ fd.append('Event state',formDraft['Event state']||'');
+ fd.append('Event ZIP',formDraft['Event ZIP']||'');
  fd.append('Adults',String(adults));
  fd.append('Children age 4–12',String(children));
  fd.append('Children age 3 and under',String(toddlers));
