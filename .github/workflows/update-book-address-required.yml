@@ -17,5 +17,5 @@ jobs:
           git config user.name "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
           git add book.html
-          git commit -m "Preserve full event address through booking steps"
+          git commit -m "Use one autocomplete field for event address"
           git push
