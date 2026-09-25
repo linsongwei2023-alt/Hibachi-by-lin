@@ -1,0 +1,34 @@
+name: Preserve booking address fields
+on:
+  push:
+    paths:
+      - '.github/workflows/fix-book-address-persistence.yml'
+permissions:
+  contents: write
+jobs:
+  update:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Preserve and submit complete address
+        run: |
+          python3 - <<'PY'
+          from pathlib import Path
+          p=Path('book.html'); s=p.read_text()
+          old='''function summaryStrip(){const d=formDraft['Event date']||'Not set',t=formDraft['Preferred time']||'Not set',z=formDraft['City or ZIP']||'Not set';return `<div class="summaryStrip"><div><small>Date</small><strong>${esc(d)}</strong></div><div><small>Time</small><strong>${esc(t)}</strong></div><div><small>Area</small><strong>${esc(z)}</strong></div></div>`}
+function hiddenPrior(includeContact=false){let h=`<input type="hidden" name="Event date" value="${esc(formDraft['Event date'])}"><input type="hidden" name="Preferred time" value="${esc(formDraft['Preferred time'])}"><input type="hidden" name="City or ZIP" value="${esc(formDraft['City or ZIP'])}">`;if(includeContact)h+=`<input type="hidden" name="Customer name" value="${esc(formDraft['Customer name'])}"><input type="hidden" name="Customer email" value="${esc(formDraft['Customer email'])}"><input type="hidden" name="Customer phone number" value="${esc(formDraft['Customer phone number'])}">`;return h}'''
+          new='''function summaryStrip(){const d=formDraft['Event date']||'Not set',t=formDraft['Preferred time']||'Not set',city=formDraft['Event city']||'',state=formDraft['Event state']||'',zip=formDraft['Event ZIP']||'',z=[city,state,zip].filter(Boolean).join(', ')||'Not set';return `<div class="summaryStrip"><div><small>Date</small><strong>${esc(d)}</strong></div><div><small>Time</small><strong>${esc(t)}</strong></div><div><small>Area</small><strong>${esc(z)}</strong></div></div>`}
+function hiddenPrior(includeContact=false){let h=`<input type="hidden" name="Event date" value="${esc(formDraft['Event date'])}"><input type="hidden" name="Preferred time" value="${esc(formDraft['Preferred time'])}"><input type="hidden" name="Street address" value="${esc(formDraft['Street address'])}"><input type="hidden" name="Event city" value="${esc(formDraft['Event city'])}"><input type="hidden" name="Event state" value="${esc(formDraft['Event state'])}"><input type="hidden" name="Event ZIP" value="${esc(formDraft['Event ZIP'])}"><input type="hidden" name="Address latitude" value="${esc(formDraft['Address latitude'])}"><input type="hidden" name="Address longitude" value="${esc(formDraft['Address longitude'])}"><input type="hidden" name="Google Place ID" value="${esc(formDraft['Google Place ID'])}">`;if(includeContact)h+=`<input type="hidden" name="Customer name" value="${esc(formDraft['Customer name'])}"><input type="hidden" name="Customer email" value="${esc(formDraft['Customer email'])}"><input type="hidden" name="Customer phone number" value="${esc(formDraft['Customer phone number'])}">`;return h}'''
+          if old not in s: raise SystemExit('summary/hiddenPrior block not found')
+          s=s.replace(old,new,1)
+          s=s.replace("fd.append('City or ZIP',formDraft['City or ZIP']||'');", "fd.append('Street address',formDraft['Street address']||'');\n fd.append('Event city',formDraft['Event city']||'');\n fd.append('Event state',formDraft['Event state']||'');\n fd.append('Event ZIP',formDraft['Event ZIP']||'');")
+          # Hidden Google fields are not captured by captureDraft, so keep final required customer address fields explicit.
+          p.write_text(s)
+          PY
+      - name: Commit
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add book.html
+          git commit -m "Preserve full event address through booking steps"
+          git push
