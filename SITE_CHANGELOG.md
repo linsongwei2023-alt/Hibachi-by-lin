@@ -33,3 +33,9 @@ This file records maintenance milestones. Git history remains the detailed, auth
 - Moved the complete event address to Step 1: street, city, state and ZIP.
 - Removed duplicate event-address entry from Step 3.
 - Kept contact/date/time/address/allergy fields required and made protein selection required before submission.
+
+## 2026-09-25 21:20 UTC — Event Moments gallery
+
+- Added five portrait event photos and one playable portrait video to the homepage Event Moments carousel.
+- Shows one item at a time with horizontal swipe and six synchronized navigation dots.
+- Commit: see Git history for this entry.
