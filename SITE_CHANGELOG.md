@@ -2,6 +2,14 @@
 
 This file records maintenance milestones. Git history remains the detailed, authoritative change record.
 
+## 2026-09-25
+
+- Added a concise homepage “What’s Included” section with current adult/child pricing, core proteins, $500 food minimum, and links to the full menu and booking flow.
+- Added Bay Area SEO landing pages for San Jose, Fremont, Oakland, and Palo Alto.
+- Added internal links from the San Francisco Bay Area hub and California service page to the new city pages.
+- Added the new Bay Area city URLs to the sitemap.
+- Created restore branch `backup/2026-09-25-pre-home-included-bay-area-seo` before these changes.
+
 ## 2026-09-22
 
 - Added neutral `hbl_lead` and `hbl_booking_request` dataLayer events on the booking flow so Google Ads / GTM can map conversions without changing the customer experience.

@@ -155,6 +155,24 @@ h1{margin:0;font:700 24px/1.14 Georgia,serif;letter-spacing:-.01em}
 .localSeo p{margin:8px auto 0;max-width:720px;color:var(--muted);font-size:13px;line-height:1.55}
 @media(min-width:760px){.localSeo{padding:32px 28px 36px}.localSeo h2{font-size:32px}.localSeo p{font-size:14px}}
 
+
+.included{background:#0a0908;border-top:1px solid rgba(217,171,74,.18);padding:40px 20px 46px}
+.includedWrap{max-width:980px;margin:0 auto;text-align:center}
+.includedEyebrow{margin:0 0 8px;color:var(--gold);font-size:13px;font-weight:900;letter-spacing:.18em}
+.includedTitle{margin:0;color:#fff;font:700 34px/1.08 Georgia,serif}
+.includedCopy{margin:10px auto 24px;max-width:640px;color:var(--muted);font-size:14px;line-height:1.6}
+.includedGrid{display:grid;grid-template-columns:1fr;gap:11px;text-align:left}
+.includedCard{padding:18px;border:1px solid rgba(217,171,74,.40);border-radius:10px;background:linear-gradient(180deg,#14110e,#0b0908)}
+.includedCard .label{display:block;color:var(--gold2);font-size:11px;font-weight:900;letter-spacing:.12em;margin-bottom:7px}
+.includedCard h3{margin:0 0 6px;color:#fff;font-size:18px}
+.includedCard p{margin:0;color:var(--muted);font-size:13px;line-height:1.55}
+.includedProteins{margin:18px auto 0;max-width:760px;color:#eee4d7;font-size:13px;line-height:1.65}
+.includedProteins b{color:var(--gold2)}
+.includedNote{margin:8px auto 0;color:var(--muted);font-size:12px;line-height:1.55}
+.includedActions{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin:22px auto 0;max-width:520px}
+.includedActions .btn{height:54px}
+@media(min-width:760px){.included{padding:56px 28px 62px}.includedTitle{font-size:44px}.includedCopy{font-size:16px}.includedGrid{grid-template-columns:repeat(3,1fr);gap:14px}.includedCard{padding:22px}.includedCard h3{font-size:20px}.includedCard p{font-size:14px}.includedProteins{font-size:14px}.includedActions .btn{height:58px}}
+
 .serviceAreas{background:#0c0a08;border-top:1px solid rgba(217,171,74,.18);padding:44px 20px 50px}.serviceAreasWrap{max-width:980px;margin:0 auto;text-align:center}.serviceAreas .mini{margin:0 0 8px;color:var(--gold);font-size:12px;font-weight:900;letter-spacing:.17em}.serviceAreas h2{margin:0;color:#fff;font:700 32px/1.08 Georgia,serif}.serviceAreasCopy{margin:11px auto 24px;max-width:620px;color:var(--muted);font-size:14px;line-height:1.6}.areaGrid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px}.areaLink{min-height:76px;padding:14px 8px;display:flex;align-items:center;justify-content:center;border:1px solid rgba(217,171,74,.48);border-radius:6px;background:linear-gradient(180deg,#14110e,#0b0908);color:#fff;font-size:16px;font-weight:900;line-height:1.3}.areaLink:hover,.areaLink:focus-visible{border-color:var(--gold2);color:var(--gold2)}.travelNote{margin:20px auto 0;max-width:720px;color:var(--muted);font-size:12px;line-height:1.6}@media(min-width:760px){.serviceAreas{padding:58px 28px 64px}.serviceAreas h2{font-size:42px}.serviceAreasCopy{font-size:16px}.areaGrid{grid-template-columns:repeat(3,minmax(0,1fr));gap:15px}.areaLink{min-height:88px;font-size:18px}.travelNote{font-size:13px}}
 
 </style>
@@ -199,6 +217,22 @@ fbq('track','PageView');
     </section>
   </div>
 </main>
+
+<section class="included" aria-labelledby="included-title">
+  <div class="includedWrap">
+    <p class="includedEyebrow">WHAT'S INCLUDED</p>
+    <h2 class="includedTitle" id="included-title">Simple Pricing. Full Hibachi Experience.</h2>
+    <p class="includedCopy">Choose your proteins and we bring the private chef, hibachi grill, food, cooking equipment and live experience to your event.</p>
+    <div class="includedGrid">
+      <article class="includedCard"><span class="label">ADULT</span><h3>$50 · 2 Proteins</h3><p>Each adult chooses 2 main protein servings.</p></article>
+      <article class="includedCard"><span class="label">CHILD · AGE 4–12</span><h3>$25 · 1 Protein</h3><p>Each child chooses 1 main protein. Age 3 &amp; under eat free.</p></article>
+      <article class="includedCard"><span class="label">LIVE HIBACHI</span><h3>Chef, Grill &amp; Show</h3><p>Fresh cooking, fire and chef-to-guest interaction brought directly to your party.</p></article>
+    </div>
+    <p class="includedProteins"><b>Main proteins:</b> Chicken · Steak · Shrimp · Salmon</p>
+    <p class="includedNote">$500 food minimum per event. Add-ons and any applicable travel fee are additional.</p>
+    <div class="includedActions"><a class="btn secondary" href="/menu">VIEW FULL MENU</a><a class="btn primary" href="/book">BOOK NOW</a></div>
+  </div>
+</section>
 
 <section class="serviceAreas" aria-labelledby="service-areas-title">
   <div class="serviceAreasWrap">
