@@ -1,0 +1,29 @@
+name: Apply landing sticky actions
+on:
+  workflow_dispatch:
+  push:
+    paths:
+      - '.github/scripts/apply_landing_sticky_actions.py'
+      - 'landing-sticky-actions.css'
+permissions:
+  contents: write
+jobs:
+  apply:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.x'
+      - run: python .github/scripts/apply_landing_sticky_actions.py
+      - name: Commit generated landing page updates
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add areas-we-serve.html hibachi-*.html
+          if git diff --cached --quiet; then
+            echo "No landing page changes needed"
+          else
+            git commit -m "Normalize sticky CTAs across all landing pages"
+            git push
+          fi
