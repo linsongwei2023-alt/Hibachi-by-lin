@@ -27,3 +27,9 @@ This file records maintenance milestones. Git history remains the detailed, auth
 - Unified homepage SEO metadata and the canonical `www.hibachibylin.com` domain. Commit: `0dbd7a8cc64c0cd2ce0b029d6f0ed200cdf4c638`.
 - Aligned the homepage social-sharing SEO description. Commit: `e888d5d5cdb0a22c57651979d042a9b3a63ec1dc`.
 - Added the durable maintenance, recovery, and backup workflow for future Chat and Work sessions.
+
+## 2026-09-25 — Booking flow address cleanup
+
+- Moved the complete event address to Step 1: street, city, state and ZIP.
+- Removed duplicate event-address entry from Step 3.
+- Kept contact/date/time/address/allergy fields required and made protein selection required before submission.
