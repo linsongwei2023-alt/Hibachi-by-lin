@@ -165,3 +165,8 @@ This file records maintenance milestones. Git history remains the detailed, auth
 
 - Enlarged only the entrance START label to 18px on desktop and 17px on phones, preserving its transparent button and opening behavior.
 - Commit: recorded in Git history for this entry.
+
+## 2026-09-26 18:10 UTC
+
+- Enlarged the entrance START label to 22px on desktop and 21px on phones, while reducing horizontal button padding for a tighter gold border.
+- Commit: recorded in Git history for this entry.
