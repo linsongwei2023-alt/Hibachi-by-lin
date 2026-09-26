@@ -44,3 +44,8 @@ This file records maintenance milestones. Git history remains the detailed, auth
 
 - Reduced the portrait media carousel width on phones based on the visible viewport height, so one item fits more comfortably on screen without cropping.
 - Commit: see Git history for this entry.
+
+## 2026-09-26 03:04 UTC — Wider Event Moments on phones
+
+- Changed the phone gallery frame to a wider 2:3 portrait shape with centered media cropping, while keeping the six original files and carousel behavior.
+- Commit: see Git history for this entry.
