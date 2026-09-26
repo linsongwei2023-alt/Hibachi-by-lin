@@ -113,3 +113,10 @@ This file records maintenance milestones. Git history remains the detailed, auth
 
 - Moved the live estimated base food price on booking step 1 directly above Estimated guests, near the guest counters. The calculation and $500 food minimum are unchanged.
 - Commit: recorded in Git history for this entry.
+
+## 2026-09-26 05:20 UTC
+
+- Improved scrolling performance across the homepage, Menu, and landing pages by replacing blurred fixed/sticky action bars with visually matching solid dark backgrounds.
+- Kept offscreen Event Moments video from decoding during scrolling, deferred its metadata load, and grouped carousel scroll updates to one animation frame.
+- Deferred Menu and Event Moments image decoding/loading until needed. Existing controls, pricing, and booking flow are unchanged.
+- Commit: recorded in Git history for this entry.
