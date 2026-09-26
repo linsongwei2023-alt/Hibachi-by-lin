@@ -81,3 +81,10 @@ This file records maintenance milestones. Git history remains the detailed, auth
 - Intro is skippable, plays once per browser tab session, and is omitted for reduced-motion settings.
 - Kept homepage content, booking links, and other pages unchanged.
 - Commit: see Git history for this entry.
+
+## 2026-09-26 04:50 UTC — Click-to-enter doors
+
+- Replaced the automatic intro dismissal with a central Enter the Experience button.
+- Added two black-and-gold panels that open outward to reveal the homepage; keyboard users can activate the same button.
+- The entrance appears on every homepage load. Reduced-motion settings keep the click-to-enter step without the opening animation.
+- Commit: see Git history for this entry.
