@@ -88,3 +88,10 @@ This file records maintenance milestones. Git history remains the detailed, auth
 - Added two black-and-gold panels that open outward to reveal the homepage; keyboard users can activate the same button.
 - The entrance appears on every homepage load. Reduced-motion settings keep the click-to-enter step without the opening animation.
 - Commit: see Git history for this entry.
+
+## 2026-09-26 04:55 UTC — Animated fire on entrance
+
+- Replaced the full logo in the click-to-enter panel with a continuously moving flame and small rising embers.
+- Kept the two-door entry behavior, brand title, and entry button unchanged.
+- Reduced-motion settings display a still flame.
+- Commit: see Git history for this entry.
