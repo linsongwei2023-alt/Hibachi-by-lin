@@ -150,3 +150,8 @@ This file records maintenance milestones. Git history remains the detailed, auth
 
 - Changed only the entrance START button focus ring from white to gold so its initial focused state matches the black-and-gold doors.
 - Commit: recorded in Git history for this entry.
+
+## 2026-09-26 18:04 UTC
+
+- Changed the entrance START button focus outline from gold to black, keeping the gold button border and text.
+- Commit: recorded in Git history for this entry.
