@@ -160,3 +160,8 @@ This file records maintenance milestones. Git history remains the detailed, auth
 
 - Removed automatic initial focus from the entrance START button so no focus ring appears on page load; keyboard focus styling remains available when tabbing to it.
 - Commit: recorded in Git history for this entry.
+
+## 2026-09-26 18:08 UTC
+
+- Enlarged only the entrance START label to 18px on desktop and 17px on phones, preserving its transparent button and opening behavior.
+- Commit: recorded in Git history for this entry.
