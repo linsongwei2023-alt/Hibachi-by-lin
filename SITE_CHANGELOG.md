@@ -39,3 +39,8 @@ This file records maintenance milestones. Git history remains the detailed, auth
 - Added five portrait event photos and one playable portrait video to the homepage Event Moments carousel.
 - Shows one item at a time with horizontal swipe and six synchronized navigation dots.
 - Commit: see Git history for this entry.
+
+## 2026-09-26 03:00 UTC — Event Moments mobile size
+
+- Reduced the portrait media carousel width on phones based on the visible viewport height, so one item fits more comfortably on screen without cropping.
+- Commit: see Git history for this entry.
