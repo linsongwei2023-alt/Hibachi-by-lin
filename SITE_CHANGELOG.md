@@ -120,3 +120,8 @@ This file records maintenance milestones. Git history remains the detailed, auth
 - Kept offscreen Event Moments video from decoding during scrolling, deferred its metadata load, and grouped carousel scroll updates to one animation frame.
 - Deferred Menu and Event Moments image decoding/loading until needed. Existing controls, pricing, and booking flow are unchanged.
 - Commit: recorded in Git history for this entry.
+
+## 2026-09-26 17:27 UTC
+
+- Replaced the Hibachi Experience video with the supplied portrait video and fixed its display frame to the same 3:4 proportions and responsive width as Event Moments.
+- Commit: recorded in Git history for this entry.
