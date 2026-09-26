@@ -61,3 +61,10 @@ This file records maintenance milestones. Git history remains the detailed, auth
 - Replaced the five gallery photos and video with the new user-provided 3:4 versions in the same order.
 - Refreshed the video poster and gallery media URLs to avoid stale browser caches. No other page content or carousel behavior changed.
 - Commit: see Git history for this entry.
+
+## 2026-09-26 04:20 UTC — Homepage typography
+
+- Simplified the hero headline and supporting sentence while keeping the mobile hibachi service description.
+- Balanced the homepage typography across phone and desktop: smaller introductory label, consistent section headings, and more readable card, step, FAQ and note text.
+- Kept the existing black-and-gold design, section order, booking links and behavior.
+- Commit: 67a0fdcaa78bdb08df1579ede35aa9ca7d1e5453.
