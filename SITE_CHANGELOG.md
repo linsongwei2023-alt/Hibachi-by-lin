@@ -155,3 +155,8 @@ This file records maintenance milestones. Git history remains the detailed, auth
 
 - Changed the entrance START button focus outline from gold to black, keeping the gold button border and text.
 - Commit: recorded in Git history for this entry.
+
+## 2026-09-26 18:06 UTC
+
+- Removed automatic initial focus from the entrance START button so no focus ring appears on page load; keyboard focus styling remains available when tabbing to it.
+- Commit: recorded in Git history for this entry.
