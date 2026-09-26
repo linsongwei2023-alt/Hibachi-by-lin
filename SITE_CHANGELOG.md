@@ -74,3 +74,10 @@ This file records maintenance milestones. Git history remains the detailed, auth
 - Added a shared typography stylesheet to all 31 interior HTML pages, including service areas, city landing pages, menu, booking, quote, review and availability.
 - Standardized heading hierarchy and line spacing, increased small body and form text, and retained existing page content and behavior.
 - Commit: see Git history for this entry.
+
+## 2026-09-26 04:43 UTC — Homepage entrance animation
+
+- Added a short black-and-gold first-visit intro using the existing logo and a fire-inspired light sweep.
+- Intro is skippable, plays once per browser tab session, and is omitted for reduced-motion settings.
+- Kept homepage content, booking links, and other pages unchanged.
+- Commit: see Git history for this entry.
