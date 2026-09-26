@@ -95,3 +95,11 @@ This file records maintenance milestones. Git history remains the detailed, auth
 - Kept the two-door entry behavior, brand title, and entry button unchanged.
 - Reduced-motion settings display a still flame.
 - Commit: see Git history for this entry.
+
+## 2026-09-26 05:01 UTC — Engraved entrance doors
+
+- Restored the same logo used at the top left of the homepage in the entrance card and changed the button label to START.
+- Reduced the central card size to reveal more of the door panels.
+- Added subdued etched hibachi grill, steam and chef-tool motifs to the doors; removed the animated flame icon.
+- Preserved the click-to-open interaction.
+- Commit: see Git history for this entry.
