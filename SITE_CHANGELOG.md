@@ -49,3 +49,9 @@ This file records maintenance milestones. Git history remains the detailed, auth
 
 - Changed the phone gallery frame to a wider 2:3 portrait shape with centered media cropping, while keeping the six original files and carousel behavior.
 - Commit: see Git history for this entry.
+
+## 2026-09-26 03:14 UTC — Fixed 3:4 portrait Event Moments frame
+
+- Set every Event Moments slide to a 3:4 width-to-height frame (portrait orientation of the camera's 4:3 setting).
+- Photos and videos display in full within the frame; future 3:4 portrait photos fill it naturally, while narrower videos retain side space.
+- Commit: see Git history for this entry.
