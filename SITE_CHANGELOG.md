@@ -68,3 +68,9 @@ This file records maintenance milestones. Git history remains the detailed, auth
 - Balanced the homepage typography across phone and desktop: smaller introductory label, consistent section headings, and more readable card, step, FAQ and note text.
 - Kept the existing black-and-gold design, section order, booking links and behavior.
 - Commit: 67a0fdcaa78bdb08df1579ede35aa9ca7d1e5453.
+
+## 2026-09-26 04:34 UTC — Sitewide typography
+
+- Added a shared typography stylesheet to all 31 interior HTML pages, including service areas, city landing pages, menu, booking, quote, review and availability.
+- Standardized heading hierarchy and line spacing, increased small body and form text, and retained existing page content and behavior.
+- Commit: see Git history for this entry.

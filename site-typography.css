@@ -1,0 +1,31 @@
+/* Shared reading hierarchy for interior pages. Homepage has its own matching rules. */
+:root{font-synthesis:none}
+.eyebrow,.kicker{font-size:13px;line-height:1.45;letter-spacing:.12em;font-weight:800}
+.hero h1{font-size:clamp(38px,4.3vw,54px);line-height:1.1;letter-spacing:-.02em;text-wrap:balance}
+.bookHero h1{font-size:clamp(36px,4vw,46px);line-height:1.12;text-wrap:balance}
+.section h2,.band h2,.closing h2{font-size:clamp(30px,3.5vw,40px);line-height:1.16;letter-spacing:-.018em;text-wrap:balance}
+.lead,.lede,.intro,.sectionIntro,.sectionHead>p,.bodyText{font-size:17px;line-height:1.6}
+.card h3,.region h3,.stepsGrid h3,.steps h3{font-size:20px;line-height:1.3}
+.card p,.region p,.stepsGrid p,.steps p,.travelBox p,.faq p,.faq details p,.availability,.note,.final p,.contactBox p{font-size:16px;line-height:1.58}
+.faq summary,.faqItem summary{font-size:16px;line-height:1.45}
+.region strong,.region .eyebrow,.city,.chip,.pricePill,.footerLinks a{font-size:14px;line-height:1.4}
+.title{font-size:clamp(30px,3.5vw,40px);line-height:1.15;letter-spacing:-.018em}
+.priceCard p,.rules p,.proteinBody strong,.proteinBody span,.appCard .name,.row,.infoItem b,.infoItem span{font-size:16px;line-height:1.5}
+.review .intro,.review .label{font-size:16px}
+@media(max-width:760px){
+.hero h1{font-size:clamp(32px,8.6vw,38px);line-height:1.12}
+.bookHero h1{font-size:clamp(32px,8vw,38px)}
+.section h2,.band h2,.closing h2{font-size:clamp(28px,7.5vw,32px);line-height:1.17}
+.lead,.lede,.intro,.sectionIntro,.sectionHead>p,.bodyText{font-size:16px;line-height:1.58}
+.card h3,.region h3,.stepsGrid h3,.steps h3{font-size:18px}
+.card p,.region p,.stepsGrid p,.steps p,.travelBox p,.faq p,.faq details p,.availability,.note,.final p,.contactBox p{font-size:15px;line-height:1.55}
+.faq summary,.faqItem summary{font-size:15px;line-height:1.45}
+.region strong,.city,.chip,.pricePill{font-size:13px}
+.title{font-size:30px}
+.priceCard p,.rules p,.proteinBody strong,.proteinBody span,.appCard .name,.row,.infoItem b,.infoItem span{font-size:15px}
+}
+/* Keep booking and review forms legible without changing their controls. */
+label,.label,.stepIntro,.hint,.stepError{font-size:14px;line-height:1.5}
+.formTop small,.formTop span{font-size:12px;line-height:1.45}
+.priceCard h3{font-size:14px;line-height:1.35;white-space:normal}
+@media(max-width:760px){.city,.chip,.pricePill{font-size:14px}}
