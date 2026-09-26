@@ -135,3 +135,8 @@ This file records maintenance milestones. Git history remains the detailed, auth
 
 - Replaced the entrance door guardian head outlines with full-body Qinglong and Baihu carved door artworks. Fit both creatures fully within the mobile door panels and reduced the central intro card width so they remain visible. The START opening behavior is unchanged.
 - Commit: recorded in Git history for this entry.
+
+## 2026-09-26 17:54 UTC
+
+- Simplified only the entrance START panel to the site name and button. Made the card smaller and translucent, and moved it upward on phones so the Baihu head remains visible. Door artwork and opening behavior are unchanged.
+- Commit: recorded in Git history for this entry.
