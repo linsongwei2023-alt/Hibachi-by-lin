@@ -55,3 +55,9 @@ This file records maintenance milestones. Git history remains the detailed, auth
 - Set every Event Moments slide to a 3:4 width-to-height frame (portrait orientation of the camera's 4:3 setting).
 - Photos and videos display in full within the frame; future 3:4 portrait photos fill it naturally, while narrower videos retain side space.
 - Commit: see Git history for this entry.
+
+## 2026-09-26 03:19 UTC — Replace Event Moments media
+
+- Replaced the five gallery photos and video with the new user-provided 3:4 versions in the same order.
+- Refreshed the video poster and gallery media URLs to avoid stale browser caches. No other page content or carousel behavior changed.
+- Commit: see Git history for this entry.
