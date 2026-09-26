@@ -170,3 +170,8 @@ This file records maintenance milestones. Git history remains the detailed, auth
 
 - Enlarged the entrance START label to 22px on desktop and 21px on phones, while reducing horizontal button padding for a tighter gold border.
 - Commit: recorded in Git history for this entry.
+
+## 2026-09-26 18:13 UTC
+
+- Changed the entrance START text and border to black, with a translucent gold fill for readability against the dark door seam. Kept the same button size and opening behavior.
+- Commit: recorded in Git history for this entry.
