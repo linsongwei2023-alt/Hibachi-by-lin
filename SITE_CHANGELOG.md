@@ -140,3 +140,8 @@ This file records maintenance milestones. Git history remains the detailed, auth
 
 - Simplified only the entrance START panel to the site name and button. Made the card smaller and translucent, and moved it upward on phones so the Baihu head remains visible. Door artwork and opening behavior are unchanged.
 - Commit: recorded in Git history for this entry.
+
+## 2026-09-26 17:58 UTC
+
+- Removed the name and card from the entrance overlay, leaving only a transparent gold-outlined START button. Kept its original door-opening interaction and mobile position.
+- Commit: recorded in Git history for this entry.
