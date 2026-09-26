@@ -145,3 +145,8 @@ This file records maintenance milestones. Git history remains the detailed, auth
 
 - Removed the name and card from the entrance overlay, leaving only a transparent gold-outlined START button. Kept its original door-opening interaction and mobile position.
 - Commit: recorded in Git history for this entry.
+
+## 2026-09-26 18:01 UTC
+
+- Changed only the entrance START button focus ring from white to gold so its initial focused state matches the black-and-gold doors.
+- Commit: recorded in Git history for this entry.
