@@ -125,3 +125,8 @@ This file records maintenance milestones. Git history remains the detailed, auth
 
 - Replaced the Hibachi Experience video with the supplied portrait video and fixed its display frame to the same 3:4 proportions and responsive width as Event Moments.
 - Commit: recorded in Git history for this entry.
+
+## 2026-09-26 17:34 UTC
+
+- Replaced the Hibachi Experience poster with a frame from the new portrait video, sized for its 3:4 display, and refreshed its URL to bypass old cached covers.
+- Commit: recorded in Git history for this entry.
