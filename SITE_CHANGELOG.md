@@ -103,3 +103,8 @@ This file records maintenance milestones. Git history remains the detailed, auth
 - Added subdued etched hibachi grill, steam and chef-tool motifs to the doors; removed the animated flame icon.
 - Preserved the click-to-open interaction.
 - Commit: see Git history for this entry.
+
+## 2026-09-26 05:06 UTC
+
+- Added subtle hibachi themed flame, steam, and grill carvings around the upper, lower, left, and right edges of both entrance doors. Preserved the existing logo, START button, and click-to-open animation.
+- Commit: recorded in Git history for this entry.
