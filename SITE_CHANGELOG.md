@@ -108,3 +108,8 @@ This file records maintenance milestones. Git history remains the detailed, auth
 
 - Added subtle hibachi themed flame, steam, and grill carvings around the upper, lower, left, and right edges of both entrance doors. Preserved the existing logo, START button, and click-to-open animation.
 - Commit: recorded in Git history for this entry.
+
+## 2026-09-26 05:13 UTC
+
+- Moved the live estimated base food price on booking step 1 directly above Estimated guests, near the guest counters. The calculation and $500 food minimum are unchanged.
+- Commit: recorded in Git history for this entry.
