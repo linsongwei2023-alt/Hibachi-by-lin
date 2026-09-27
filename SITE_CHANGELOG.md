@@ -175,3 +175,9 @@ This file records maintenance milestones. Git history remains the detailed, auth
 
 - Changed the entrance START text and border to black, with a translucent gold fill for readability against the dark door seam. Kept the same button size and opening behavior.
 - Commit: recorded in Git history for this entry.
+
+## 2026-09-27 UTC — Event Moments media and dates
+
+- Replaced the first three Event Moments photos with the September 26 uploads; kept the remaining two photos and video.
+- Displayed September 26, 2026 below the first three slides and September 19, 2026 below the last three slides.
+- Commit: recorded in Git history for this entry.
