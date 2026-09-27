@@ -181,3 +181,8 @@ This file records maintenance milestones. Git history remains the detailed, auth
 - Replaced the first three Event Moments photos with the September 26 uploads; kept the remaining two photos and video.
 - Displayed September 26, 2026 below the first three slides and September 19, 2026 below the last three slides.
 - Commit: recorded in Git history for this entry.
+
+## 2026-09-27 UTC — Review card dates
+
+- Added right-aligned dates at the bottom of the five homepage review cards: September 25, 2026 for the first two and September 19, 2026 for the remaining three.
+- Commit: recorded in Git history for this entry.
