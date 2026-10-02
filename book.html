@@ -86,8 +86,9 @@ function filetRow(){const max=steakPortions();if(max<=0)return '';return `<div c
 
 function esc(v){return String(v??'').replace(/[&<>"']/g,m=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[m]))}
 function stepProgress(){return `<div class="bookingSteps"><div class="bookingStep ${bookingStep===1?'active':bookingStep>1?'done':''}">1 · Date & guests</div><div class="bookingStep ${bookingStep===2?'active':bookingStep>2?'done':''}">2 · Contact</div><div class="bookingStep ${bookingStep===3?'active':''}">3 · Menu & request</div></div>`}
-function summaryStrip(){const d=formDraft['Event date']||'Not set',t=formDraft['Preferred time']||'Not set',z=formDraft['Street address']||'Not set';return `<div class="summaryStrip"><div><small>Date</small><strong>${esc(d)}</strong></div><div><small>Time</small><strong>${esc(t)}</strong></div><div><small>Address</small><strong>${esc(z)}</strong></div></div>`}
-function hiddenPrior(includeContact=false){let h=`<input type="hidden" name="Event date" value="${esc(formDraft['Event date'])}"><input type="hidden" name="Preferred time" value="${esc(formDraft['Preferred time'])}"><input type="hidden" name="Street address" value="${esc(formDraft['Street address'])}">`;if(includeContact)h+=`<input type="hidden" name="Customer name" value="${esc(formDraft['Customer name'])}"><input type="hidden" name="Customer email" value="${esc(formDraft['Customer email'])}"><input type="hidden" name="Customer phone number" value="${esc(formDraft['Customer phone number'])}">`;return h}
+function summaryStrip(){const d=formDraft['Event date']||'Not set',t=displayEventTime()||'Not set',z=formDraft['Street address']||'Not set';return `<div class="summaryStrip"><div><small>Date</small><strong>${esc(d)}</strong></div><div><small>Time</small><strong>${esc(t)}</strong></div><div><small>Address</small><strong>${esc(z)}</strong></div></div>`}
+function hiddenPrior(includeContact=false){let h=`<input type="hidden" name="Event date" value="${esc(formDraft['Event date'])}"><input type="hidden" name="Event time" value="${esc(displayEventTime())}"><input type="hidden" name="Preferred time" value="${esc(formDraft['Preferred time'])}"><input type="hidden" name="Street address" value="${esc(formDraft['Street address'])}">`;if(includeContact)h+=`<input type="hidden" name="Customer name" value="${esc(formDraft['Customer name'])}"><input type="hidden" name="Customer email" value="${esc(formDraft['Customer email'])}"><input type="hidden" name="Customer phone number" value="${esc(formDraft['Customer phone number'])}">`;return h}
+function displayEventTime(raw=formDraft['Preferred time']||''){if(!raw)return '';const m=String(raw).match(/^(\d{2}):(\d{2})$/);if(!m)return raw+(eventTimeZoneAbbr?' '+eventTimeZoneAbbr:'');const h24=Number(m[1]),min=m[2],ampm=h24>=12?'PM':'AM',h=h24%12||12;return `${h}:${min} ${ampm}${eventTimeZoneAbbr?' '+eventTimeZoneAbbr:''}`}
 function currentLeadKey(){return [formDraft['Event date']||'',formDraft['Customer email']||'',formDraft['Customer phone number']||''].join('|').toLowerCase()}
 function pushTrackingEvent(name,detail={}){window.dataLayer=window.dataLayer||[];window.dataLayer.push({event:name,...detail})}
 async function sendEarlyLead(){
@@ -102,7 +103,7 @@ async function sendEarlyLead(){
  fd.append('Lead stage','Date + contact captured');
  fd.append('Lead source',new URLSearchParams(location.search).get('source')||document.referrer||'Website');
  fd.append('Event date',formDraft['Event date']||'');
- fd.append('Preferred time',formDraft['Preferred time']||'');
+ fd.append('Event time',displayEventTime());
  fd.append('Full event address',formDraft['Street address']||'');
  fd.append('Adults',String(adults));
  fd.append('Children age 4–12',String(children));
