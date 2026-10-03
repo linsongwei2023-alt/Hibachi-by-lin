@@ -199,3 +199,10 @@ This file records maintenance milestones. Git history remains the detailed, auth
 - Changed gallery ordering to newest first, with the October 3 photo first.
 - Retain the newest 10 combined photos/videos and remove older overflow entries.
 - Commit: recorded in Git history for this entry.
+
+## 2026-10-03 16:37 UTC — Three supplied guest reviews
+
+- Added user-supplied feedback for Los Angeles, CA; Hobart, IN; Chicago, IL to the start of Reviews.
+- Preserved feedback verbatim; dated new cards October 2, 2026. No reviewer names or star ratings were supplied or invented.
+- Expanded pagination to eight cards; kept existing reviews and card styles.
+- Commit: recorded in Git history for this entry.
