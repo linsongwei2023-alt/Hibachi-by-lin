@@ -248,7 +248,7 @@ function bind(){
    document.getElementById('replyto').value=data.get('Customer email')||'';
    document.getElementById('chicagoTime').value=new Intl.DateTimeFormat('en-US',{timeZone:'America/Chicago',year:'numeric',month:'short',day:'numeric',hour:'numeric',minute:'2-digit',second:'2-digit',timeZoneName:'short'}).format(new Date());
    const nz=o=>Object.fromEntries(Object.entries(o).filter(([,v])=>v>0));
-   const payload={r:`HBL-${Date.now().toString().slice(-7)}`,d:data.get('Event date'),t:data.get('Preferred time'),a:data.get('Full event address'),n:data.get('Customer name'),e:data.get('Customer email'),p:data.get('Customer phone number'),y:data.get('Food allergy details'),g:[adults,children,toddlers],ap:menuLater?{}:nz(adultP),cp:menuLater?{}:nz(childP),x:nz(extraC),f:filetUpgrade,m:menuLater?'TBD':'Selected'};
+   const payload={r:`HBL-${Date.now().toString().slice(-7)}`,d:data.get('Event date'),t:displayEventTime(data.get('Preferred time')||''),a:data.get('Full event address'),n:data.get('Customer name'),e:data.get('Customer email'),p:data.get('Customer phone number'),y:data.get('Food allergy details'),g:[adults,children,toddlers],ap:menuLater?{}:nz(adultP),cp:menuLater?{}:nz(childP),x:nz(extraC),f:filetUpgrade,m:menuLater?'TBD':'Selected'};
    document.getElementById('quoteLink').value=`https://hibachibylin.com/quote/?d=${compact(payload)}`;
  }
 }
