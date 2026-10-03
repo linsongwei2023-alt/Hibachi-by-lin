@@ -329,7 +329,6 @@ render();
                 fallback.dataset.googleValidated='1';
                 eventTimeZone=zoneFromAddressComponents(place.addressComponents||[]);
                 refreshEventTimeZone();
-                if(window.hblTravelFee)await window.hblTravelFee.calculate(fallback.value,place.addressComponents||[],loc?loc.lat():'');
                 sessionToken=null;
                 hideSuggestions();
                 setAddressHelp('Address selected ✓','ok');
@@ -472,5 +471,4 @@ bindBookingValidation();
   send();
 })();
 </script>
-<script src="/assets/travel-fee.js"></script>
 </body></html>
