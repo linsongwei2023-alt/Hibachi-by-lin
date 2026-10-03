@@ -329,6 +329,7 @@ render();
                 fallback.dataset.googleValidated='1';
                 eventTimeZone=zoneFromAddressComponents(place.addressComponents||[]);
                 refreshEventTimeZone();
+                document.dispatchEvent(new CustomEvent('hbl-address-selected',{detail:{address:fallback.value,components:place.addressComponents||[],lat:loc?loc.lat():''}}));
                 sessionToken=null;
                 hideSuggestions();
                 setAddressHelp('Address selected ✓','ok');
