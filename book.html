@@ -124,6 +124,715 @@ async function sendEarlyLead(){
 function alloc(title,type,obj,limit){const tot=totalProtein(obj),rem=limit-tot;return `<section class="proteinAllocator"><div class="proteinHeader"><div><strong>${title}</strong><small>${limit} total serving${limit===1?'':'s'} included</small></div><b>${tot} / ${limit}</b></div>${proteins.map(p=>`<div class="proteinRow"><span>${p}</span><div class="counter"><button type="button" data-p="${type}|${p}" data-d="-1" ${(obj[p]||0)===0?'disabled':''}>−</button><strong>${obj[p]||0}</strong><button type="button" data-p="${type}|${p}" data-d="1" ${tot>=limit?'aria-disabled="true"':''}>＋</button></div></div>`).join('')}<p class="allocationStatus ${rem===0?'complete':''}">${rem===0?`All ${limit} serving${limit===1?'':'s'} selected.`:`Choose ${rem} more serving${rem===1?'':'s'}.`}</p></section>`}
 let eventTimeZone='';
 let eventTimeZoneAbbr='';
+let travelDistanceMiles='',travelFee='',travelFeeStatus='Not calculated',travelOrigin='';
+const TRAVEL_ORIGINS={southCA:'451 N Gerona Ave, San Gabriel, CA 91775',northCA:'43281 Gallegos Ave, Fremont, CA 94539',midwest:'5332 N Cumberland Ave, Chicago, IL 60656'};
+function travelRegion(components=[],lat){const get=t=>components.find(c=>(c.types||[]).includes(t));const state=(get('administrative_area_level_1')?.shortText||get('administrative_area_level_1')?.short_name||'').toUpperCase();if(['IL','WI','IN','MI'].includes(state))return {origin:TRAVEL_ORIGINS.midwest};if(state==='CA'){const y=Number(lat);if(y>=35.2828)return {origin:TRAVEL_ORIGINS.northCA};if(y<=34.4208)return {origin:TRAVEL_ORIGINS.southCA}}return {manual:true}}
+function travelFeeText(){return travelFeeStatus==='Calculated'?'
+function zoneAbbr(zone,dateStr){
+ if(!zone)return '';
+ const d=dateStr?new Date(dateStr+'T12:00:00Z'):new Date();
+ try{return new Intl.DateTimeFormat('en-US',{timeZone:zone,timeZoneName:'short'}).formatToParts(d).find(p=>p.type==='timeZoneName')?.value||''}catch(e){return ''}
+}
+function zoneFromAddressComponents(components=[]){
+ const get=type=>components.find(c=>(c.types||[]).includes(type));
+ const state=(get('administrative_area_level_1')?.shortText||get('administrative_area_level_1')?.short_name||'').toUpperCase();
+ const county=(get('administrative_area_level_2')?.longText||get('administrative_area_level_2')?.long_name||'').replace(/ County$/i,'').trim();
+ if(state==='CA')return 'America/Los_Angeles';
+ if(['IL','WI'].includes(state))return 'America/Chicago';
+ if(state==='IN'){
+   const central=new Set(['Lake','Porter','LaPorte','Newton','Jasper','Starke','Gibson','Perry','Posey','Spencer','Vanderburgh','Warrick']);
+   return central.has(county)?'America/Chicago':'America/Indiana/Indianapolis';
+ }
+ if(state==='MI')return 'America/Detroit';
+ if(state==='FL'){
+   const central=new Set(['Bay','Calhoun','Escambia','Holmes','Jackson','Okaloosa','Santa Rosa','Walton','Washington']);
+   return central.has(county)?'America/Chicago':'America/New_York';
+ }
+ return '';
+}
+function refreshEventTimeZone(){
+ const date=document.querySelector('input[name="Event date"]')?.value||formDraft['Event date']||'';
+ eventTimeZoneAbbr=zoneAbbr(eventTimeZone,date);
+ const sel=document.getElementById('eventTimeSelect');
+ if(!sel)return;
+ [...sel.options].forEach((o,i)=>{if(i===0)return;const base=o.textContent.replace(/\s(?:PDT|PST|CDT|CST|EDT|EST)$/,'');o.textContent=base+(eventTimeZoneAbbr?' '+eventTimeZoneAbbr:'')});
+}
+function render(){
+ if(new URLSearchParams(location.search).get('submitted')==='1'){
+   const key=sessionStorage.getItem('hblCurrentLeadKey')||'';
+   if(window.fbq){
+     if(!key||sessionStorage.getItem('hblLeadSent:'+key)!=='1')fbq('track','Lead');
+     fbq('trackCustom','BookingRequest');
+   }
+   if(sessionStorage.getItem('hblBookingRequestTracked')!=='1'){
+     pushTrackingEvent('hbl_booking_request',{currency:'USD'});
+     sessionStorage.setItem('hblBookingRequestTracked','1');
+   }
+   mount.innerHTML=`<div class="bookingCard success"><div>✓</div><h2>Request sent!</h2><p>Your booking request has been emailed to Hibachi by Lin. We’ll review the date, travel fee and final itemized quote, then contact you to confirm.</p><a class="submit backLink" href="/book/">Send another request</a></div>`;return
+ }
+ const ap=totalProtein(adultP),cp=totalProtein(childP),complete=ap===adults*2&&(children===0||cp===children),t=price();
+ const common=`<input type="hidden" name="_next" value="https://hibachibylin.com/book/?submitted=1"><input type="hidden" name="_subject" value="New Hibachi by Lin booking request"><input type="hidden" name="_cc" value="linsongwei2023@gmail.com"><input type="hidden" name="_template" value="basic"><input type="hidden" name="_captcha" value="false"><input id="replyto" type="hidden" name="_replyto"><input type="text" name="_honey" class="honeypot" tabindex="-1"><input id="quoteLink" type="hidden" name="OPEN QUOTE BUILDER — TAP OR COPY THIS LINK"><input id="chicagoTime" type="hidden" name="Submitted at Chicago time"><input type="hidden" name="Event time zone" value="${eventTimeZoneAbbr}"><input type="hidden" name="Estimated food and add-ons total" value="${t}"><input type="hidden" name="Travel fee" value="${esc(travelFeeText())}"><input type="hidden" name="Travel distance" value="${esc(travelMilesText())}"><input type="hidden" name="Travel fee origin" value="${esc(travelOrigin||'Manual Review')}"><input type="hidden" name="Adults" value="${adults}"><input type="hidden" name="Children age 4–12" value="${children}"><input type="hidden" name="Children age 3 and under" value="${toddlers}">${proteins.map(p=>`<input type="hidden" name="Adult ${p} protein servings" value="${adultP[p]||0}"><input type="hidden" name="Child ${p} protein servings" value="${childP[p]||0}">`).join('')}${extras.map(([n])=>`<input type="hidden" name="${n} orders" value="${extraC[n]||0}">`).join('')}<input type="hidden" name="Menu selection status" value="${menuLater?'TBD - customer will finalize later':'Selected online'}">`;
+ let body='';
+ if(bookingStep===1){
+   body=`${stepProgress()}<p class="stepIntro">Start with the basics. We’ll use this to check the date and service area before you spend time choosing every menu detail.</p><h3 class="formSection">Date & location</h3><div class="fieldRow"><label>Event date<input name="Event date" type="date" min="${chicagoTomorrow()}" required><small id="bookingDateHelp" style="display:block;margin-top:7px;color:#756d62;font-size:11px;font-weight:400;line-height:1.4">Choose a date from ${chicagoTomorrow()} onward.</small></label><label>Preferred time<select id="eventTimeSelect" name="Preferred time" required><option value="" disabled selected>Select a time</option>${Array.from({length:14},(_,i)=>{const m=780+i*30,h24=Math.floor(m/60),mm=m%60,h=h24>12?h24-12:h24;return `<option value="${String(h24).padStart(2,'0')}:${String(mm).padStart(2,'0')}">${h}:${String(mm).padStart(2,'0')} PM${eventTimeZoneAbbr?` ${eventTimeZoneAbbr}`:''}</option>`}).join('')}</select></label></div><h3 class="formSection">Event address</h3><label>Full event address<input name="Street address" placeholder="Start typing your address" required autocomplete="street-address" id="eventAddress" inputmode="text"><div id="addressAutocompleteHost" class="addressAutocompleteHost"></div><div id="addressAutocompleteHelp" class="addressHelp">Start typing and select the complete address from the suggestions.</div><input type="hidden" id="addressLat" name="Address latitude"><input type="hidden" id="addressLng" name="Address longitude"><input type="hidden" id="addressPlaceId" name="Google Place ID"></label>${travelFeePanel()}<div class="formTop guestEstimate"><div><small>ESTIMATED BASE FOOD</small><strong>$${Math.max(500,adults*50+children*25).toLocaleString()}</strong></div><span>No payment now</span></div><h3 class="formSection">Estimated guests</h3>${guestRow('Adults','$50 · 2 proteins each','adults',adults)}${guestRow('Children age 4–12','$25 · 1 protein each','children',children)}${guestRow('Children age 3 & under','Free','toddlers',toddlers)}<p class="minimum">$500 food minimum · about 10 adults at base pricing</p><div class="leadTrust"><span>No deposit</span><span>No online payment</span><span>Travel fee calculated by location</span></div><div class="stepActions"><button id="nextStep" class="submit" type="submit">Continue →</button></div>`;
+ }else if(bookingStep===2){
+   body=`${stepProgress()}${hiddenPrior(false)}${summaryStrip()}<p class="stepIntro">Where should we send your availability confirmation? Once you continue, we’ll save this as an inquiry so you don’t have to finish the whole menu right now.</p><h3 class="formSection">Your contact info</h3><label>Your name<input name="Customer name" required autocomplete="name"></label><div class="fieldRow"><label>Email<input name="Customer email" type="email" required autocomplete="email" inputmode="email" placeholder="name@example.com"></label><label>Phone number<input name="Customer phone number" type="tel" required autocomplete="tel" inputmode="tel" placeholder="312-555-1234"></label></div><div class="contactHint"><b>No payment or deposit required.</b><br>Continuing saves your date and contact information as an availability inquiry. You can then finish the menu now or finalize it later.</div>${bookingError?`<div class="stepError">${esc(bookingError)}</div>`:''}<div class="stepActions"><button id="backStep" class="secondaryBtn" type="button">← Back</button><button id="nextStep" class="submit" type="submit">Continue to Menu →</button></div>`;
+ }else{
+   body=`${stepProgress()}${hiddenPrior(true)}${summaryStrip()}<div class="formTop"><div><small>ESTIMATED FOOD & ADD-ONS</small><strong>$${t.toLocaleString()}</strong></div><span>No payment now</span></div>${adults*50+children*25<500?'<p class="minimum">$500 food minimum applied</p>':''}<p class="estimateNotice">Food estimate only. Travel fee is calculated from driving distance when available; manual-review locations will be confirmed separately. Tax and optional gratuity appear in the final itemized quote.</p><h3 class="formSection">Menu</h3><div class="tbdNotice" style="display:block">Please complete all included protein selections before submitting.</div><div class="proteinFields ${menuLater?'menuTbdActive':''}"><p class="proteinIntro">Choose from Chicken, Steak, Shrimp, Salmon, Filet Mignon (+$5 per serving) or Lobster Tail (+$10 per serving).</p><div class="tbdNotice">Menu marked TBD. We’ll confirm proteins with you before the event.</div>${alloc('Adult proteins','a',adultP,adults*2)}${children?alloc('Child proteins','c',childP,children):''}<div class="orderExample"><b>Order example</b><p>10 adults include 20 protein servings. One possible mix is <strong>10 Chicken, 6 Steak, and 4 Shrimp</strong>.</p></div></div><div class="extras"><b>Optional appetizers & add-ons</b>${extras.map(([n,p])=>guestRow(n,`+$${p} per order`,`extra:${n}`,extraC[n]||0)).join('')}</div><h3 class="formSection">Allergies</h3><label>Does anyone have food allergies?<select id="allergySelect" name="Any food allergies" required><option value="" disabled selected>Select one</option><option>No</option><option>Yes</option></select></label><label id="allergyDetailsWrap" class="allergyDetailsHidden">Please describe the food allergy<textarea id="allergyDetails" name="Food allergy details" placeholder="List the allergy and affected guest."></textarea></label><label class="confirm"><input type="checkbox" required><span>I understand this is a request only. My date is confirmed after availability and the final quote are reviewed.</span></label><p id="allocErr" class="allocationError hidden"></p><div class="stepActions"><button id="backStep" class="secondaryBtn" type="button">← Back</button><button class="submit" type="submit">Request Booking →</button></div>${!complete?'<p class="fine">Choose all included protein servings before submitting.</p>':''}<p class="fine">No payment is collected on this website.</p>`;
+ }
+ mount.innerHTML=`<form id="bookingForm" class="bookingCard" action="https://formsubmit.co/booking@hibachibylin.com" method="POST">${common}${body}</form>`;
+ restoreDraft();applyLeadPrefill();toggleAllergyDetails();bind();if(window.bindBookingValidation)window.bindBookingValidation();if(window.mountHibachiAddressAutocomplete&&bookingStep===1)setTimeout(window.mountHibachiAddressAutocomplete,0);
+}
+function applyLeadPrefill(){
+ const qs=new URLSearchParams(location.search);
+ if(qs.get('source')!=='la-lead')return;
+ let lead=null;
+ try{lead=JSON.parse(sessionStorage.getItem('hblLeadPrefill')||'null')}catch(e){}
+ if(!lead)return;
+ const f=document.getElementById('bookingForm');
+ if(!f)return;
+ const set=(selector,value)=>{const el=f.querySelector(selector);if(el&&value){el.value=value;el.dispatchEvent(new Event('change',{bubbles:true}))}};
+ set('input[name="Event date"]',lead.date);
+ set('select[name="Preferred time"]',lead.time);
+ set('input[name="Customer name"]',lead.name);
+ set('input[name="Customer email"]',lead.email);
+ set('input[name="Customer phone number"]',lead.phone);
+ sessionStorage.removeItem('hblLeadPrefill');
+}
+function toggleAllergyDetails(){
+ const select=document.getElementById('allergySelect'),wrap=document.getElementById('allergyDetailsWrap'),details=document.getElementById('allergyDetails');
+ if(!select||!wrap||!details)return;
+ const yes=select.value==='Yes';
+ wrap.classList.toggle('allergyDetailsHidden',!yes);
+ details.required=yes;
+ if(!yes)details.value='';
+}
+function stableCounterRender(anchor){
+ const beforeTop=anchor.getBoundingClientRect().top;
+ const groupKey=anchor.dataset.g||'';
+ const proteinKey=anchor.dataset.p||'';
+ const direction=anchor.dataset.d||'';
+ const oldScroll=window.scrollY;
+ render();
+ requestAnimationFrame(()=>requestAnimationFrame(()=>{
+   const selector=groupKey?'[data-g]':'[data-p]';
+   const next=[...document.querySelectorAll(selector)].find(el=>(groupKey?el.dataset.g===groupKey:el.dataset.p===proteinKey)&&el.dataset.d===direction);
+   if(next){const delta=next.getBoundingClientRect().top-beforeTop;if(Math.abs(delta)>0.5)window.scrollBy(0,delta);}
+   else if(Math.abs(window.scrollY-oldScroll)>0.5){window.scrollTo(0,oldScroll);}
+ }));
+}
+function bind(){
+ const allergySelect=document.getElementById('allergySelect');if(allergySelect)allergySelect.onchange=toggleAllergyDetails;
+ menuLater=false;
+ document.querySelectorAll('.counter').forEach(c=>c.ondblclick=e=>e.preventDefault());
+ document.querySelectorAll('[data-g]').forEach(b=>b.onclick=()=>{captureDraft();const k=b.dataset.g,d=Number(b.dataset.d);if(k==='adults'){adults=Math.max(0,adults+d);clamp(adultP,adults*2);clampFilet()}else if(k==='children'){children=Math.max(0,children+d);clamp(childP,children);clampFilet()}else if(k==='toddlers')toddlers=Math.max(0,toddlers+d);else if(k==='filet'){const max=steakPortions();filetUpgrade=Math.max(0,Math.min(max,filetUpgrade+d))}else if(k.startsWith('extra:')){const n=k.slice(6);extraC[n]=Math.max(0,(extraC[n]||0)+d)}stableCounterRender(b)});
+ document.querySelectorAll('[data-p]').forEach(b=>b.onclick=()=>{captureDraft();const [type,n]=b.dataset.p.split('|'),d=Number(b.dataset.d),obj=type==='a'?adultP:childP,limit=type==='a'?adults*2:children;if(d>0&&totalProtein(obj)>=limit)return;obj[n]=Math.max(0,(obj[n]||0)+d);if(n==='Steak')clampFilet();stableCounterRender(b)});
+ const back=document.getElementById('backStep');if(back)back.onclick=()=>{captureDraft();bookingError='';bookingStep=Math.max(1,bookingStep-1);render()};
+ const f=document.getElementById('bookingForm');if(!f)return;
+ f.onsubmit=async e=>{
+   if(bookingStep===1){
+     e.preventDefault();bookingError='';
+     if(!validateBookingDate(f)){f.querySelector('input[name="Event date"]')?.reportValidity();return}
+     if(!f.reportValidity())return;
+     captureDraft();bookingStep=2;render();return;
+   }
+   if(bookingStep===2){
+     e.preventDefault();bookingError='';validateBookingContact();if(!f.reportValidity())return;
+     captureDraft();
+     const btn=document.getElementById('nextStep');if(btn){btn.disabled=true;btn.textContent='Saving…'}
+     const ok=await sendEarlyLead();
+     if(!ok){bookingError='We could not save your inquiry. Please check your connection and try again.';render();return}
+     bookingStep=3;render();return;
+   }
+   if(!validateBookingDate(f)){e.preventDefault();return}
+   if(totalProtein(adultP)!==adults*2||totalProtein(childP)!==children){
+     e.preventDefault();const er=document.getElementById('allocErr');er.textContent=totalProtein(adultP)!==adults*2?`Please select all ${adults*2} adult protein servings.`:`Please select all ${children} child protein servings.`;er.classList.remove('hidden');return
+   }
+   const data=new FormData(f);
+   document.getElementById('replyto').value=data.get('Customer email')||'';
+   document.getElementById('chicagoTime').value=new Intl.DateTimeFormat('en-US',{timeZone:'America/Chicago',year:'numeric',month:'short',day:'numeric',hour:'numeric',minute:'2-digit',second:'2-digit',timeZoneName:'short'}).format(new Date());
+   const nz=o=>Object.fromEntries(Object.entries(o).filter(([,v])=>v>0));
+   const payload={r:`HBL-${Date.now().toString().slice(-7)}`,d:data.get('Event date'),t:displayEventTime(data.get('Preferred time')||''),a:data.get('Full event address'),n:data.get('Customer name'),e:data.get('Customer email'),p:data.get('Customer phone number'),y:data.get('Food allergy details'),g:[adults,children,toddlers],ap:menuLater?{}:nz(adultP),cp:menuLater?{}:nz(childP),x:nz(extraC),f:filetUpgrade,m:menuLater?'TBD':'Selected',tf:travelFeeText(),td:travelMilesText(),to:travelOrigin||'Manual Review'};
+   document.getElementById('quoteLink').value=`https://hibachibylin.com/quote/?d=${compact(payload)}`;
+ }
+}
+
+render();
+</script>
+
+
+
+<script>
+(function(){
+  const API_KEY = 'AIzaSyC8Z9RTM9IVKKZU9rGFdf19iyWQxYTfVog';
+  let placesReady = false;
+  let AutocompleteSuggestion;
+  let AutocompleteSessionToken;
+  let sessionToken;
+  let addressTimer;
+  let addressRequest=0;
+
+  function setAddressHelp(message, cls=''){
+    const el=document.getElementById('addressAutocompleteHelp');
+    if(!el)return;
+    el.textContent=message;
+    el.className='addressHelp'+(cls?' '+cls:'');
+  }
+
+  async function mountAddressWidget(){
+    const host=document.getElementById('addressAutocompleteHost');
+    const fallback=document.getElementById('eventAddress');
+    if(!host || !fallback) return;
+
+    fallback.classList.remove('addressFallbackHidden');
+    if(!placesReady || fallback.dataset.autocompleteBound==='1')return;
+    fallback.dataset.autocompleteBound='1';
+    fallback.setAttribute('aria-autocomplete','list');
+    fallback.setAttribute('aria-controls','addressSuggestions');
+    host.innerHTML='<div id="addressSuggestions" class="addressSuggestions" role="listbox" hidden></div>';
+    const list=host.querySelector('#addressSuggestions');
+
+    const hideSuggestions=()=>{list.hidden=true;list.innerHTML=''};
+    const clearPlaceData=()=>{
+      fallback.dataset.googleValidated='';
+      ['addressLat','addressLng','addressPlaceId'].forEach(id=>{const el=document.getElementById(id);if(el)el.value=''});
+    };
+
+    fallback.addEventListener('input',()=>{
+      clearPlaceData();
+      fallback.setCustomValidity('');
+      clearTimeout(addressTimer);
+      const input=fallback.value.trim();
+      if(input.length<3){hideSuggestions();setAddressHelp('Type at least 3 characters for address suggestions.');return}
+      addressTimer=setTimeout(async()=>{
+        const requestId=++addressRequest;
+        try{
+          sessionToken=sessionToken||new AutocompleteSessionToken();
+          const {suggestions}=await AutocompleteSuggestion.fetchAutocompleteSuggestions({input,includedRegionCodes:['us'],region:'us',language:'en-US',sessionToken});
+          if(requestId!==addressRequest)return;
+          list.innerHTML='';
+          suggestions.filter(item=>item.placePrediction).slice(0,5).forEach(item=>{
+            const prediction=item.placePrediction;
+            const button=document.createElement('button');
+            button.type='button';
+            button.className='addressSuggestion';
+            button.setAttribute('role','option');
+            button.textContent=prediction.text.toString();
+            button.addEventListener('click',async()=>{
+              try{
+                const place=prediction.toPlace();
+                await place.fetchFields({fields:['formattedAddress','location','id','addressComponents']});
+                fallback.value=place.formattedAddress||prediction.text.toString();
+                const loc=place.location;
+                const lat=document.getElementById('addressLat');
+                const lng=document.getElementById('addressLng');
+                const pid=document.getElementById('addressPlaceId');
+                if(lat)lat.value=loc?loc.lat():'';
+                if(lng)lng.value=loc?loc.lng():'';
+                if(pid)pid.value=place.id||'';
+                fallback.dataset.googleValidated='1';
+                eventTimeZone=zoneFromAddressComponents(place.addressComponents||[]);
+                refreshEventTimeZone();
+                await calculateTravelFee(fallback.value,place.addressComponents||[],loc?loc.lat():'');
+                formDraft['Travel fee']=travelFeeText();formDraft['Travel distance']=travelMilesText();formDraft['Travel fee origin']=travelOrigin||'Manual Review';
+                render();
+                sessionToken=null;
+                hideSuggestions();
+                setAddressHelp('Address selected ✓','ok');
+              }catch(err){
+                console.error('Address selection error',err);
+                hideSuggestions();
+                setAddressHelp('Please enter the full address manually.','warn');
+              }
+            });
+            list.appendChild(button);
+          });
+          list.hidden=!list.children.length;
+          setAddressHelp(list.children.length?'Choose your full address below.':'No address suggestions found. You can continue typing manually.',list.children.length?'':'warn');
+        }catch(err){
+          console.error('Google Places suggestion error',err);
+          hideSuggestions();
+          setAddressHelp('Google address suggestions are unavailable. You can still type the address manually.','warn');
+        }
+      },250);
+    });
+
+    fallback.addEventListener('blur',()=>setTimeout(()=>{if(!host.contains(document.activeElement))hideSuggestions()},180));
+    setAddressHelp('Start typing and choose your full address from the Google suggestions.');
+  }
+
+  window.mountHibachiAddressAutocomplete=mountAddressWidget;
+
+  window.initHibachiAddressAutocomplete=async function(){
+    try{
+      ({AutocompleteSuggestion,AutocompleteSessionToken}=await google.maps.importLibrary('places'));
+      placesReady=true;
+      await mountAddressWidget();
+    }catch(err){
+      console.error('Google Places initialization error',err);
+      setAddressHelp('Google address suggestions are unavailable. You can still type the address manually.','warn');
+    }
+  };
+
+  if(!API_KEY){
+    setAddressHelp('Google address suggestions are unavailable. You can still type the address manually.','warn');
+    return;
+  }
+
+  const s=document.createElement('script');
+  s.src='https://maps.googleapis.com/maps/api/js?key='+encodeURIComponent(API_KEY)+'&v=weekly&loading=async&callback=initHibachiAddressAutocomplete';
+  s.async=true;
+  s.defer=true;
+  s.onerror=()=>{
+    setAddressHelp('Google address suggestions are unavailable. You can still type the address manually.','warn');
+  };
+  document.head.appendChild(s);
+})();
+
+function validateBookingContact(){
+  const form=document.querySelector('form');
+  if(!form)return true;
+
+  const phone=form.querySelector('input[name*="Phone" i],input[name*="Telephone" i]');
+  const email=form.querySelector('input[name*="Email" i]');
+  const address=form.querySelector('input[name="Street address"]');
+
+  if(phone){
+    const digits=phone.value.replace(/\D/g,'');
+    const ten=digits.length===11&&digits.startsWith('1')?digits.slice(1):digits;
+    const valid=/^[2-9]\d{2}[2-9]\d{6}$/.test(ten);
+    phone.setCustomValidity(valid?'':'Please enter a valid U.S. phone number, for example 312-555-1234.');
+  }
+
+  if(email){
+    const value=email.value.trim();
+    const valid=/^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/.test(value);
+    email.setCustomValidity(valid?'':'Please enter a valid email address, for example name@example.com.');
+  }
+
+  if(address && !address.value.trim()){
+    address.setCustomValidity('Please enter the full event address.');
+  }else if(address){
+    address.setCustomValidity('');
+  }
+
+  return form.checkValidity();
+}
+function bindBookingValidation(){
+  const form=document.querySelector('form');
+  if(!form)return;
+
+  const phone=form.querySelector('input[name*="Phone" i],input[name*="Telephone" i]');
+  const email=form.querySelector('input[name*="Email" i]');
+  const address=form.querySelector('input[name="Street address"]');
+  const eventDate=form.querySelector('input[name="Event date"]');
+
+  if(phone){
+    phone.addEventListener('input',()=>{
+      phone.setCustomValidity('');
+      const digits=phone.value.replace(/\D/g,'').slice(0,11);
+      // Friendly formatting for a standard 10-digit U.S. number.
+      let d=digits.startsWith('1')&&digits.length>10?digits.slice(1):digits;
+      if(d.length>=7) phone.value=`${d.slice(0,3)}-${d.slice(3,6)}-${d.slice(6,10)}`;
+      else if(d.length>=4) phone.value=`${d.slice(0,3)}-${d.slice(3)}`;
+      else if(d.length>0) phone.value=d;
+    });
+  }
+  if(email)email.addEventListener('input',()=>email.setCustomValidity(''));
+  if(address)address.addEventListener('input',()=>address.setCustomValidity(''));
+  if(eventDate){eventDate.min=chicagoTomorrow();eventDate.addEventListener('change',()=>{validateBookingDate(form,true);refreshEventTimeZone()});eventDate.addEventListener('input',()=>{eventDate.min=chicagoTomorrow();eventDate.setCustomValidity('');refreshEventTimeZone()})}
+
+  form.addEventListener('submit',(e)=>{
+    validateBookingDate(form);
+    validateBookingContact();
+    if(!form.checkValidity()){
+      e.preventDefault();
+      e.stopPropagation();
+      form.reportValidity();
+    }
+  },true);
+}
+window.bindBookingValidation=bindBookingValidation;
+bindBookingValidation();
+
+</script>
+
+
+<!-- hbl-contact-footer-v1 -->
+<footer style="padding:32px 20px 38px;text-align:center;background:#080706;border-top:1px solid rgba(217,171,74,.22);color:#d9cebf;font:13px/1.55 Arial,sans-serif">
+  <p style="margin:0">Questions about your event? We’re happy to help.</p>
+  <a href="mailto:booking@hibachibylin.com" style="display:inline-block;margin-top:10px;color:#f0c86d;font-weight:800;text-decoration:none">booking@hibachibylin.com</a>
+</footer>
+
+<!-- hbl-meta-viewcontent-v1 -->
+<script>
+(function trackMetaViewContent(){
+  var tries=0;
+  function send(){
+    if(typeof window.fbq==='function'){
+      window.fbq('track','ViewContent',{content_name:'Hibachi Booking Page',content_category:'Booking'});
+      return;
+    }
+    if(tries++<40)setTimeout(send,250);
+  }
+  send();
+})();
+</script>
+</body></html>
++travelFee:'Manual Review'}
+function travelMilesText(){return travelFeeStatus==='Calculated'?travelDistanceMiles+' mi':'Manual Review'}
+function travelFeePanel(){if(travelFeeStatus==='Calculated')return '<div class="contactHint"><b>Estimated Travel Fee: 
+function zoneAbbr(zone,dateStr){
+ if(!zone)return '';
+ const d=dateStr?new Date(dateStr+'T12:00:00Z'):new Date();
+ try{return new Intl.DateTimeFormat('en-US',{timeZone:zone,timeZoneName:'short'}).formatToParts(d).find(p=>p.type==='timeZoneName')?.value||''}catch(e){return ''}
+}
+function zoneFromAddressComponents(components=[]){
+ const get=type=>components.find(c=>(c.types||[]).includes(type));
+ const state=(get('administrative_area_level_1')?.shortText||get('administrative_area_level_1')?.short_name||'').toUpperCase();
+ const county=(get('administrative_area_level_2')?.longText||get('administrative_area_level_2')?.long_name||'').replace(/ County$/i,'').trim();
+ if(state==='CA')return 'America/Los_Angeles';
+ if(['IL','WI'].includes(state))return 'America/Chicago';
+ if(state==='IN'){
+   const central=new Set(['Lake','Porter','LaPorte','Newton','Jasper','Starke','Gibson','Perry','Posey','Spencer','Vanderburgh','Warrick']);
+   return central.has(county)?'America/Chicago':'America/Indiana/Indianapolis';
+ }
+ if(state==='MI')return 'America/Detroit';
+ if(state==='FL'){
+   const central=new Set(['Bay','Calhoun','Escambia','Holmes','Jackson','Okaloosa','Santa Rosa','Walton','Washington']);
+   return central.has(county)?'America/Chicago':'America/New_York';
+ }
+ return '';
+}
+function refreshEventTimeZone(){
+ const date=document.querySelector('input[name="Event date"]')?.value||formDraft['Event date']||'';
+ eventTimeZoneAbbr=zoneAbbr(eventTimeZone,date);
+ const sel=document.getElementById('eventTimeSelect');
+ if(!sel)return;
+ [...sel.options].forEach((o,i)=>{if(i===0)return;const base=o.textContent.replace(/\s(?:PDT|PST|CDT|CST|EDT|EST)$/,'');o.textContent=base+(eventTimeZoneAbbr?' '+eventTimeZoneAbbr:'')});
+}
+function render(){
+ if(new URLSearchParams(location.search).get('submitted')==='1'){
+   const key=sessionStorage.getItem('hblCurrentLeadKey')||'';
+   if(window.fbq){
+     if(!key||sessionStorage.getItem('hblLeadSent:'+key)!=='1')fbq('track','Lead');
+     fbq('trackCustom','BookingRequest');
+   }
+   if(sessionStorage.getItem('hblBookingRequestTracked')!=='1'){
+     pushTrackingEvent('hbl_booking_request',{currency:'USD'});
+     sessionStorage.setItem('hblBookingRequestTracked','1');
+   }
+   mount.innerHTML=`<div class="bookingCard success"><div>✓</div><h2>Request sent!</h2><p>Your booking request has been emailed to Hibachi by Lin. We’ll review the date, travel fee and final itemized quote, then contact you to confirm.</p><a class="submit backLink" href="/book/">Send another request</a></div>`;return
+ }
+ const ap=totalProtein(adultP),cp=totalProtein(childP),complete=ap===adults*2&&(children===0||cp===children),t=price();
+ const common=`<input type="hidden" name="_next" value="https://hibachibylin.com/book/?submitted=1"><input type="hidden" name="_subject" value="New Hibachi by Lin booking request"><input type="hidden" name="_cc" value="linsongwei2023@gmail.com"><input type="hidden" name="_template" value="basic"><input type="hidden" name="_captcha" value="false"><input id="replyto" type="hidden" name="_replyto"><input type="text" name="_honey" class="honeypot" tabindex="-1"><input id="quoteLink" type="hidden" name="OPEN QUOTE BUILDER — TAP OR COPY THIS LINK"><input id="chicagoTime" type="hidden" name="Submitted at Chicago time"><input type="hidden" name="Event time zone" value="${eventTimeZoneAbbr}"><input type="hidden" name="Estimated food and add-ons total" value="$${t}"><input type="hidden" name="Adults" value="${adults}"><input type="hidden" name="Children age 4–12" value="${children}"><input type="hidden" name="Children age 3 and under" value="${toddlers}">${proteins.map(p=>`<input type="hidden" name="Adult ${p} protein servings" value="${adultP[p]||0}"><input type="hidden" name="Child ${p} protein servings" value="${childP[p]||0}">`).join('')}${extras.map(([n])=>`<input type="hidden" name="${n} orders" value="${extraC[n]||0}">`).join('')}<input type="hidden" name="Menu selection status" value="${menuLater?'TBD - customer will finalize later':'Selected online'}">`;
+ let body='';
+ if(bookingStep===1){
+   body=`${stepProgress()}<p class="stepIntro">Start with the basics. We’ll use this to check the date and service area before you spend time choosing every menu detail.</p><h3 class="formSection">Date & location</h3><div class="fieldRow"><label>Event date<input name="Event date" type="date" min="${chicagoTomorrow()}" required><small id="bookingDateHelp" style="display:block;margin-top:7px;color:#756d62;font-size:11px;font-weight:400;line-height:1.4">Choose a date from ${chicagoTomorrow()} onward.</small></label><label>Preferred time<select id="eventTimeSelect" name="Preferred time" required><option value="" disabled selected>Select a time</option>${Array.from({length:14},(_,i)=>{const m=780+i*30,h24=Math.floor(m/60),mm=m%60,h=h24>12?h24-12:h24;return `<option value="${String(h24).padStart(2,'0')}:${String(mm).padStart(2,'0')}">${h}:${String(mm).padStart(2,'0')} PM${eventTimeZoneAbbr?` ${eventTimeZoneAbbr}`:''}</option>`}).join('')}</select></label></div><h3 class="formSection">Event address</h3><label>Full event address<input name="Street address" placeholder="Start typing your address" required autocomplete="street-address" id="eventAddress" inputmode="text"><div id="addressAutocompleteHost" class="addressAutocompleteHost"></div><div id="addressAutocompleteHelp" class="addressHelp">Start typing and select the complete address from the suggestions.</div><input type="hidden" id="addressLat" name="Address latitude"><input type="hidden" id="addressLng" name="Address longitude"><input type="hidden" id="addressPlaceId" name="Google Place ID"></label><div class="formTop guestEstimate"><div><small>ESTIMATED BASE FOOD</small><strong>$${Math.max(500,adults*50+children*25).toLocaleString()}</strong></div><span>No payment now</span></div><h3 class="formSection">Estimated guests</h3>${guestRow('Adults','$50 · 2 proteins each','adults',adults)}${guestRow('Children age 4–12','$25 · 1 protein each','children',children)}${guestRow('Children age 3 & under','Free','toddlers',toddlers)}<p class="minimum">$500 food minimum · about 10 adults at base pricing</p><div class="leadTrust"><span>No deposit</span><span>No online payment</span><span>Travel fee confirmed before finalizing</span></div><div class="stepActions"><button id="nextStep" class="submit" type="submit">Continue →</button></div>`;
+ }else if(bookingStep===2){
+   body=`${stepProgress()}${hiddenPrior(false)}${summaryStrip()}<p class="stepIntro">Where should we send your availability confirmation? Once you continue, we’ll save this as an inquiry so you don’t have to finish the whole menu right now.</p><h3 class="formSection">Your contact info</h3><label>Your name<input name="Customer name" required autocomplete="name"></label><div class="fieldRow"><label>Email<input name="Customer email" type="email" required autocomplete="email" inputmode="email" placeholder="name@example.com"></label><label>Phone number<input name="Customer phone number" type="tel" required autocomplete="tel" inputmode="tel" placeholder="312-555-1234"></label></div><div class="contactHint"><b>No payment or deposit required.</b><br>Continuing saves your date and contact information as an availability inquiry. You can then finish the menu now or finalize it later.</div>${bookingError?`<div class="stepError">${esc(bookingError)}</div>`:''}<div class="stepActions"><button id="backStep" class="secondaryBtn" type="button">← Back</button><button id="nextStep" class="submit" type="submit">Continue to Menu →</button></div>`;
+ }else{
+   body=`${stepProgress()}${hiddenPrior(true)}${summaryStrip()}<div class="formTop"><div><small>ESTIMATED FOOD & ADD-ONS</small><strong>$${t.toLocaleString()}</strong></div><span>No payment now</span></div>${adults*50+children*25<500?'<p class="minimum">$500 food minimum applied</p>':''}<p class="estimateNotice">Food estimate only. Travel fee is confirmed separately based on your event location. Tax and optional gratuity appear in the final itemized quote.</p><h3 class="formSection">Menu</h3><div class="tbdNotice" style="display:block">Please complete all included protein selections before submitting.</div><div class="proteinFields ${menuLater?'menuTbdActive':''}"><p class="proteinIntro">Choose from Chicken, Steak, Shrimp, Salmon, Filet Mignon (+$5 per serving) or Lobster Tail (+$10 per serving).</p><div class="tbdNotice">Menu marked TBD. We’ll confirm proteins with you before the event.</div>${alloc('Adult proteins','a',adultP,adults*2)}${children?alloc('Child proteins','c',childP,children):''}<div class="orderExample"><b>Order example</b><p>10 adults include 20 protein servings. One possible mix is <strong>10 Chicken, 6 Steak, and 4 Shrimp</strong>.</p></div></div><div class="extras"><b>Optional appetizers & add-ons</b>${extras.map(([n,p])=>guestRow(n,`+$${p} per order`,`extra:${n}`,extraC[n]||0)).join('')}</div><h3 class="formSection">Allergies</h3><label>Does anyone have food allergies?<select id="allergySelect" name="Any food allergies" required><option value="" disabled selected>Select one</option><option>No</option><option>Yes</option></select></label><label id="allergyDetailsWrap" class="allergyDetailsHidden">Please describe the food allergy<textarea id="allergyDetails" name="Food allergy details" placeholder="List the allergy and affected guest."></textarea></label><label class="confirm"><input type="checkbox" required><span>I understand this is a request only. My date is confirmed after availability and the final quote are reviewed.</span></label><p id="allocErr" class="allocationError hidden"></p><div class="stepActions"><button id="backStep" class="secondaryBtn" type="button">← Back</button><button class="submit" type="submit">Request Booking →</button></div>${!complete?'<p class="fine">Choose all included protein servings before submitting.</p>':''}<p class="fine">No payment is collected on this website.</p>`;
+ }
+ mount.innerHTML=`<form id="bookingForm" class="bookingCard" action="https://formsubmit.co/booking@hibachibylin.com" method="POST">${common}${body}</form>`;
+ restoreDraft();applyLeadPrefill();toggleAllergyDetails();bind();if(window.bindBookingValidation)window.bindBookingValidation();if(window.mountHibachiAddressAutocomplete&&bookingStep===1)setTimeout(window.mountHibachiAddressAutocomplete,0);
+}
+function applyLeadPrefill(){
+ const qs=new URLSearchParams(location.search);
+ if(qs.get('source')!=='la-lead')return;
+ let lead=null;
+ try{lead=JSON.parse(sessionStorage.getItem('hblLeadPrefill')||'null')}catch(e){}
+ if(!lead)return;
+ const f=document.getElementById('bookingForm');
+ if(!f)return;
+ const set=(selector,value)=>{const el=f.querySelector(selector);if(el&&value){el.value=value;el.dispatchEvent(new Event('change',{bubbles:true}))}};
+ set('input[name="Event date"]',lead.date);
+ set('select[name="Preferred time"]',lead.time);
+ set('input[name="Customer name"]',lead.name);
+ set('input[name="Customer email"]',lead.email);
+ set('input[name="Customer phone number"]',lead.phone);
+ sessionStorage.removeItem('hblLeadPrefill');
+}
+function toggleAllergyDetails(){
+ const select=document.getElementById('allergySelect'),wrap=document.getElementById('allergyDetailsWrap'),details=document.getElementById('allergyDetails');
+ if(!select||!wrap||!details)return;
+ const yes=select.value==='Yes';
+ wrap.classList.toggle('allergyDetailsHidden',!yes);
+ details.required=yes;
+ if(!yes)details.value='';
+}
+function stableCounterRender(anchor){
+ const beforeTop=anchor.getBoundingClientRect().top;
+ const groupKey=anchor.dataset.g||'';
+ const proteinKey=anchor.dataset.p||'';
+ const direction=anchor.dataset.d||'';
+ const oldScroll=window.scrollY;
+ render();
+ requestAnimationFrame(()=>requestAnimationFrame(()=>{
+   const selector=groupKey?'[data-g]':'[data-p]';
+   const next=[...document.querySelectorAll(selector)].find(el=>(groupKey?el.dataset.g===groupKey:el.dataset.p===proteinKey)&&el.dataset.d===direction);
+   if(next){const delta=next.getBoundingClientRect().top-beforeTop;if(Math.abs(delta)>0.5)window.scrollBy(0,delta);}
+   else if(Math.abs(window.scrollY-oldScroll)>0.5){window.scrollTo(0,oldScroll);}
+ }));
+}
+function bind(){
+ const allergySelect=document.getElementById('allergySelect');if(allergySelect)allergySelect.onchange=toggleAllergyDetails;
+ menuLater=false;
+ document.querySelectorAll('.counter').forEach(c=>c.ondblclick=e=>e.preventDefault());
+ document.querySelectorAll('[data-g]').forEach(b=>b.onclick=()=>{captureDraft();const k=b.dataset.g,d=Number(b.dataset.d);if(k==='adults'){adults=Math.max(0,adults+d);clamp(adultP,adults*2);clampFilet()}else if(k==='children'){children=Math.max(0,children+d);clamp(childP,children);clampFilet()}else if(k==='toddlers')toddlers=Math.max(0,toddlers+d);else if(k==='filet'){const max=steakPortions();filetUpgrade=Math.max(0,Math.min(max,filetUpgrade+d))}else if(k.startsWith('extra:')){const n=k.slice(6);extraC[n]=Math.max(0,(extraC[n]||0)+d)}stableCounterRender(b)});
+ document.querySelectorAll('[data-p]').forEach(b=>b.onclick=()=>{captureDraft();const [type,n]=b.dataset.p.split('|'),d=Number(b.dataset.d),obj=type==='a'?adultP:childP,limit=type==='a'?adults*2:children;if(d>0&&totalProtein(obj)>=limit)return;obj[n]=Math.max(0,(obj[n]||0)+d);if(n==='Steak')clampFilet();stableCounterRender(b)});
+ const back=document.getElementById('backStep');if(back)back.onclick=()=>{captureDraft();bookingError='';bookingStep=Math.max(1,bookingStep-1);render()};
+ const f=document.getElementById('bookingForm');if(!f)return;
+ f.onsubmit=async e=>{
+   if(bookingStep===1){
+     e.preventDefault();bookingError='';
+     if(!validateBookingDate(f)){f.querySelector('input[name="Event date"]')?.reportValidity();return}
+     if(!f.reportValidity())return;
+     captureDraft();bookingStep=2;render();return;
+   }
+   if(bookingStep===2){
+     e.preventDefault();bookingError='';validateBookingContact();if(!f.reportValidity())return;
+     captureDraft();
+     const btn=document.getElementById('nextStep');if(btn){btn.disabled=true;btn.textContent='Saving…'}
+     const ok=await sendEarlyLead();
+     if(!ok){bookingError='We could not save your inquiry. Please check your connection and try again.';render();return}
+     bookingStep=3;render();return;
+   }
+   if(!validateBookingDate(f)){e.preventDefault();return}
+   if(totalProtein(adultP)!==adults*2||totalProtein(childP)!==children){
+     e.preventDefault();const er=document.getElementById('allocErr');er.textContent=totalProtein(adultP)!==adults*2?`Please select all ${adults*2} adult protein servings.`:`Please select all ${children} child protein servings.`;er.classList.remove('hidden');return
+   }
+   const data=new FormData(f);
+   document.getElementById('replyto').value=data.get('Customer email')||'';
+   document.getElementById('chicagoTime').value=new Intl.DateTimeFormat('en-US',{timeZone:'America/Chicago',year:'numeric',month:'short',day:'numeric',hour:'numeric',minute:'2-digit',second:'2-digit',timeZoneName:'short'}).format(new Date());
+   const nz=o=>Object.fromEntries(Object.entries(o).filter(([,v])=>v>0));
+   const payload={r:`HBL-${Date.now().toString().slice(-7)}`,d:data.get('Event date'),t:displayEventTime(data.get('Preferred time')||''),a:data.get('Full event address'),n:data.get('Customer name'),e:data.get('Customer email'),p:data.get('Customer phone number'),y:data.get('Food allergy details'),g:[adults,children,toddlers],ap:menuLater?{}:nz(adultP),cp:menuLater?{}:nz(childP),x:nz(extraC),f:filetUpgrade,m:menuLater?'TBD':'Selected'};
+   document.getElementById('quoteLink').value=`https://hibachibylin.com/quote/?d=${compact(payload)}`;
+ }
+}
+
+render();
+</script>
+
+
+
+<script>
+(function(){
+  const API_KEY = 'AIzaSyC8Z9RTM9IVKKZU9rGFdf19iyWQxYTfVog';
+  let placesReady = false;
+  let AutocompleteSuggestion;
+  let AutocompleteSessionToken;
+  let sessionToken;
+  let addressTimer;
+  let addressRequest=0;
+
+  function setAddressHelp(message, cls=''){
+    const el=document.getElementById('addressAutocompleteHelp');
+    if(!el)return;
+    el.textContent=message;
+    el.className='addressHelp'+(cls?' '+cls:'');
+  }
+
+  async function mountAddressWidget(){
+    const host=document.getElementById('addressAutocompleteHost');
+    const fallback=document.getElementById('eventAddress');
+    if(!host || !fallback) return;
+
+    fallback.classList.remove('addressFallbackHidden');
+    if(!placesReady || fallback.dataset.autocompleteBound==='1')return;
+    fallback.dataset.autocompleteBound='1';
+    fallback.setAttribute('aria-autocomplete','list');
+    fallback.setAttribute('aria-controls','addressSuggestions');
+    host.innerHTML='<div id="addressSuggestions" class="addressSuggestions" role="listbox" hidden></div>';
+    const list=host.querySelector('#addressSuggestions');
+
+    const hideSuggestions=()=>{list.hidden=true;list.innerHTML=''};
+    const clearPlaceData=()=>{
+      fallback.dataset.googleValidated='';
+      ['addressLat','addressLng','addressPlaceId'].forEach(id=>{const el=document.getElementById(id);if(el)el.value=''});
+    };
+
+    fallback.addEventListener('input',()=>{
+      clearPlaceData();
+      fallback.setCustomValidity('');
+      clearTimeout(addressTimer);
+      const input=fallback.value.trim();
+      if(input.length<3){hideSuggestions();setAddressHelp('Type at least 3 characters for address suggestions.');return}
+      addressTimer=setTimeout(async()=>{
+        const requestId=++addressRequest;
+        try{
+          sessionToken=sessionToken||new AutocompleteSessionToken();
+          const {suggestions}=await AutocompleteSuggestion.fetchAutocompleteSuggestions({input,includedRegionCodes:['us'],region:'us',language:'en-US',sessionToken});
+          if(requestId!==addressRequest)return;
+          list.innerHTML='';
+          suggestions.filter(item=>item.placePrediction).slice(0,5).forEach(item=>{
+            const prediction=item.placePrediction;
+            const button=document.createElement('button');
+            button.type='button';
+            button.className='addressSuggestion';
+            button.setAttribute('role','option');
+            button.textContent=prediction.text.toString();
+            button.addEventListener('click',async()=>{
+              try{
+                const place=prediction.toPlace();
+                await place.fetchFields({fields:['formattedAddress','location','id','addressComponents']});
+                fallback.value=place.formattedAddress||prediction.text.toString();
+                const loc=place.location;
+                const lat=document.getElementById('addressLat');
+                const lng=document.getElementById('addressLng');
+                const pid=document.getElementById('addressPlaceId');
+                if(lat)lat.value=loc?loc.lat():'';
+                if(lng)lng.value=loc?loc.lng():'';
+                if(pid)pid.value=place.id||'';
+                fallback.dataset.googleValidated='1';
+                eventTimeZone=zoneFromAddressComponents(place.addressComponents||[]);
+                refreshEventTimeZone();
+                sessionToken=null;
+                hideSuggestions();
+                setAddressHelp('Address selected ✓','ok');
+              }catch(err){
+                console.error('Address selection error',err);
+                hideSuggestions();
+                setAddressHelp('Please enter the full address manually.','warn');
+              }
+            });
+            list.appendChild(button);
+          });
+          list.hidden=!list.children.length;
+          setAddressHelp(list.children.length?'Choose your full address below.':'No address suggestions found. You can continue typing manually.',list.children.length?'':'warn');
+        }catch(err){
+          console.error('Google Places suggestion error',err);
+          hideSuggestions();
+          setAddressHelp('Google address suggestions are unavailable. You can still type the address manually.','warn');
+        }
+      },250);
+    });
+
+    fallback.addEventListener('blur',()=>setTimeout(()=>{if(!host.contains(document.activeElement))hideSuggestions()},180));
+    setAddressHelp('Start typing and choose your full address from the Google suggestions.');
+  }
+
+  window.mountHibachiAddressAutocomplete=mountAddressWidget;
+
+  window.initHibachiAddressAutocomplete=async function(){
+    try{
+      ({AutocompleteSuggestion,AutocompleteSessionToken}=await google.maps.importLibrary('places'));
+      placesReady=true;
+      await mountAddressWidget();
+    }catch(err){
+      console.error('Google Places initialization error',err);
+      setAddressHelp('Google address suggestions are unavailable. You can still type the address manually.','warn');
+    }
+  };
+
+  if(!API_KEY){
+    setAddressHelp('Google address suggestions are unavailable. You can still type the address manually.','warn');
+    return;
+  }
+
+  const s=document.createElement('script');
+  s.src='https://maps.googleapis.com/maps/api/js?key='+encodeURIComponent(API_KEY)+'&v=weekly&loading=async&callback=initHibachiAddressAutocomplete';
+  s.async=true;
+  s.defer=true;
+  s.onerror=()=>{
+    setAddressHelp('Google address suggestions are unavailable. You can still type the address manually.','warn');
+  };
+  document.head.appendChild(s);
+})();
+
+function validateBookingContact(){
+  const form=document.querySelector('form');
+  if(!form)return true;
+
+  const phone=form.querySelector('input[name*="Phone" i],input[name*="Telephone" i]');
+  const email=form.querySelector('input[name*="Email" i]');
+  const address=form.querySelector('input[name="Street address"]');
+
+  if(phone){
+    const digits=phone.value.replace(/\D/g,'');
+    const ten=digits.length===11&&digits.startsWith('1')?digits.slice(1):digits;
+    const valid=/^[2-9]\d{2}[2-9]\d{6}$/.test(ten);
+    phone.setCustomValidity(valid?'':'Please enter a valid U.S. phone number, for example 312-555-1234.');
+  }
+
+  if(email){
+    const value=email.value.trim();
+    const valid=/^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/.test(value);
+    email.setCustomValidity(valid?'':'Please enter a valid email address, for example name@example.com.');
+  }
+
+  if(address && !address.value.trim()){
+    address.setCustomValidity('Please enter the full event address.');
+  }else if(address){
+    address.setCustomValidity('');
+  }
+
+  return form.checkValidity();
+}
+function bindBookingValidation(){
+  const form=document.querySelector('form');
+  if(!form)return;
+
+  const phone=form.querySelector('input[name*="Phone" i],input[name*="Telephone" i]');
+  const email=form.querySelector('input[name*="Email" i]');
+  const address=form.querySelector('input[name="Street address"]');
+  const eventDate=form.querySelector('input[name="Event date"]');
+
+  if(phone){
+    phone.addEventListener('input',()=>{
+      phone.setCustomValidity('');
+      const digits=phone.value.replace(/\D/g,'').slice(0,11);
+      // Friendly formatting for a standard 10-digit U.S. number.
+      let d=digits.startsWith('1')&&digits.length>10?digits.slice(1):digits;
+      if(d.length>=7) phone.value=`${d.slice(0,3)}-${d.slice(3,6)}-${d.slice(6,10)}`;
+      else if(d.length>=4) phone.value=`${d.slice(0,3)}-${d.slice(3)}`;
+      else if(d.length>0) phone.value=d;
+    });
+  }
+  if(email)email.addEventListener('input',()=>email.setCustomValidity(''));
+  if(address)address.addEventListener('input',()=>address.setCustomValidity(''));
+  if(eventDate){eventDate.min=chicagoTomorrow();eventDate.addEventListener('change',()=>{validateBookingDate(form,true);refreshEventTimeZone()});eventDate.addEventListener('input',()=>{eventDate.min=chicagoTomorrow();eventDate.setCustomValidity('');refreshEventTimeZone()})}
+
+  form.addEventListener('submit',(e)=>{
+    validateBookingDate(form);
+    validateBookingContact();
+    if(!form.checkValidity()){
+      e.preventDefault();
+      e.stopPropagation();
+      form.reportValidity();
+    }
+  },true);
+}
+window.bindBookingValidation=bindBookingValidation;
+bindBookingValidation();
+
+</script>
+
+
+<!-- hbl-contact-footer-v1 -->
+<footer style="padding:32px 20px 38px;text-align:center;background:#080706;border-top:1px solid rgba(217,171,74,.22);color:#d9cebf;font:13px/1.55 Arial,sans-serif">
+  <p style="margin:0">Questions about your event? We’re happy to help.</p>
+  <a href="mailto:booking@hibachibylin.com" style="display:inline-block;margin-top:10px;color:#f0c86d;font-weight:800;text-decoration:none">booking@hibachibylin.com</a>
+</footer>
+
+<!-- hbl-meta-viewcontent-v1 -->
+<script>
+(function trackMetaViewContent(){
+  var tries=0;
+  function send(){
+    if(typeof window.fbq==='function'){
+      window.fbq('track','ViewContent',{content_name:'Hibachi Booking Page',content_category:'Booking'});
+      return;
+    }
+    if(tries++<40)setTimeout(send,250);
+  }
+  send();
+})();
+</script>
+</body></html>
++travelFee+'</b><br>'+travelDistanceMiles+' driving miles · $1/mile</div>';if(travelFeeStatus==='Calculating')return '<div class="contactHint"><b>Calculating Travel Fee…</b><br>Using driving distance from our service base.</div>';return '<div class="contactHint"><b>Travel Fee: Manual Review</b><br>We’ll confirm the travel fee before your booking is finalized.</div>'}
+async function calculateTravelFee(destination,components=[],lat){const region=travelRegion(components,lat);travelDistanceMiles='';travelFee='';travelOrigin=region.origin||'';if(region.manual){travelFeeStatus='Manual Review';return}travelFeeStatus='Calculating';try{const svc=new google.maps.DistanceMatrixService();const res=await svc.getDistanceMatrix({origins:[region.origin],destinations:[destination],travelMode:google.maps.TravelMode.DRIVING,unitSystem:google.maps.UnitSystem.IMPERIAL});const item=res&&res.rows&&res.rows[0]&&res.rows[0].elements&&res.rows[0].elements[0];if(!item||item.status!=='OK'||!item.distance||!item.distance.value)throw new Error('route unavailable');travelDistanceMiles=Math.round(item.distance.value/1609.344);travelFee=travelDistanceMiles;travelFeeStatus='Calculated'}catch(err){console.error('Travel fee calculation error',err);travelDistanceMiles='';travelFee='';travelFeeStatus='Manual Review'}}
+
 function zoneAbbr(zone,dateStr){
  if(!zone)return '';
  const d=dateStr?new Date(dateStr+'T12:00:00Z'):new Date();
