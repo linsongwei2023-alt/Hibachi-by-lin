@@ -42,7 +42,7 @@ Ask the assistant to inspect this repository and read `AGENTS.md` plus `SITE_MAI
 ## Event Moments updates
 
 - Keep at most 10 media items total, counting photos and videos together.
-- Display oldest to newest by date, retaining insertion order for equal dates.
+- Display newest to oldest by date, placing newly added media first for equal dates.
 - Add new photos/videos with a `data-date` in YYYY-MM-DD format; show dates below media.
 - Remove oldest entries when exceeding 10; keep existing 3:4 portrait frame, sizes and object-fit styling.
 - The gallery controller sorts entries, limits display to the latest 10 and generates dots and dates dynamically.

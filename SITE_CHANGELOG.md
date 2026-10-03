@@ -193,3 +193,9 @@ This file records maintenance milestones. Git history remains the detailed, auth
 - Ordered the seven existing/new media oldest to newest; capped future galleries at 10 combined photos/videos.
 - Made dots, per-slide dates and video pausing work for a variable number of media.
 - Commit: recorded in Git history for this entry.
+
+## 2026-10-03 16:26 UTC — Event Moments ordering correction
+
+- Changed gallery ordering to newest first, with the October 3 photo first.
+- Retain the newest 10 combined photos/videos and remove older overflow entries.
+- Commit: recorded in Git history for this entry.
