@@ -186,3 +186,10 @@ This file records maintenance milestones. Git history remains the detailed, auth
 
 - Added right-aligned dates at the bottom of the five homepage review cards: September 25, 2026 for the first two and September 19, 2026 for the remaining three.
 - Commit: recorded in Git history for this entry.
+
+## 2026-10-03 16:19 UTC — Event Moments update
+
+- Added the October 3, 2026 party photo, preserving original image bytes and gallery dimensions.
+- Ordered the seven existing/new media oldest to newest; capped future galleries at 10 combined photos/videos.
+- Made dots, per-slide dates and video pausing work for a variable number of media.
+- Commit: recorded in Git history for this entry.
