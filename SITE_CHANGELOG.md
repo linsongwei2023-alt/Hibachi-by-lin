@@ -206,3 +206,10 @@ This file records maintenance milestones. Git history remains the detailed, auth
 - Preserved feedback verbatim; dated new cards October 2, 2026. No reviewer names or star ratings were supplied or invented.
 - Expanded pagination to eight cards; kept existing reviews and card styles.
 - Commit: recorded in Git history for this entry.
+
+## 2026-10-03 16:42 UTC — Review names and ratings
+
+- Added supplied guest names David (Los Angeles), Leo (Hobart) and Mike (Chicago).
+- Added user-requested five-star ratings using the existing review card template.
+- Preserved feedback, October 2 dates, ordering and all other site content.
+- Commit: recorded in Git history for this entry.
