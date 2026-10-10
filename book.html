@@ -69,6 +69,17 @@ let formDraft={},confirmDraft=false,bookingStep=1,bookingError="",menuLater=fals
 function captureDraft(){const f=document.getElementById('bookingForm');if(!f)return;formDraft={...formDraft};f.querySelectorAll('input:not([type=hidden]),select,textarea').forEach(el=>{if(el.closest('.counter'))return;const k=el.name||el.id;if(!k)return;formDraft[k]=(el.type==='checkbox'||el.type==='radio')?el.checked:el.value});const c=f.querySelector('.confirm input');confirmDraft=!!(c&&c.checked)}
 function restoreDraft(){const f=document.getElementById('bookingForm');if(!f)return;for(const [k,v] of Object.entries(formDraft)){const el=f.elements.namedItem(k)||document.getElementById(k);if(!el||typeof el.value==='undefined')continue;if(el.type==='checkbox'||el.type==='radio')el.checked=!!v;else el.value=v}const c=f.querySelector('.confirm input');if(c)c.checked=confirmDraft}
 const mount=document.getElementById('formMount');
+function scrollToBookingTop(){
+  // On mobile, replace the prior form and place the next step at the top of the screen.
+  requestAnimationFrame(()=>requestAnimationFrame(()=>{
+    if(!mount)return;
+    const top=Math.max(0,window.scrollY+mount.getBoundingClientRect().top-12);
+    const root=document.documentElement,originalBehavior=root.style.scrollBehavior;
+    root.style.scrollBehavior='auto';
+    window.scrollTo(0,top);
+    root.style.scrollBehavior=originalBehavior;
+  }));
+}
 let lastProteinTouchEnd=0;
 document.addEventListener('touchend',e=>{const area=e.target.closest&&e.target.closest('.proteinFields');if(!area)return;const completeNow=totalProtein(adultP)===adults*2&&(children===0||totalProtein(childP)===children);if(!completeNow){lastProteinTouchEnd=0;return}const now=Date.now();if(now-lastProteinTouchEnd<350)e.preventDefault();lastProteinTouchEnd=now},{passive:false});
 function chicagoToday(){const p=new Intl.DateTimeFormat('en-US',{timeZone:'America/Chicago',year:'numeric',month:'2-digit',day:'2-digit'}).formatToParts(new Date());const g=t=>p.find(x=>x.type===t)?.value||'';return `${g('year')}-${g('month')}-${g('day')}`}
@@ -230,7 +241,7 @@ function bind(){
      const btn=document.getElementById('nextStep');if(btn){btn.disabled=true;btn.textContent='Saving…'}
      const ok=await sendEarlyLead();
      if(!ok){bookingError='We could not save your inquiry. Please check your connection and try again.';render();return}
-     bookingStep=2;render();return;
+     bookingStep=2;render();scrollToBookingTop();return;
    }
    if(!validateBookingDate(f)){
      e.preventDefault();captureDraft();
