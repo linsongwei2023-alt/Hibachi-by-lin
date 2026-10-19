@@ -248,7 +248,8 @@ function bind(){
      bookingError='Your event date is no longer available. Please go back and choose another date.';
      render();return;
    }
-   if(totalProtein(adultP)!==adults*2||totalProtein(childP)!==children){
+   if(adults+children<1){e.preventDefault();const er=document.getElementById('allocErr');if(er){er.textContent='Please add at least one paying guest (adult or child) before submitting.';er.classList.remove('hidden')}return}
+    if(totalProtein(adultP)!==adults*2||totalProtein(childP)!==children){
      e.preventDefault();const er=document.getElementById('allocErr');er.textContent=totalProtein(adultP)!==adults*2?`Please select all ${adults*2} adult protein servings.`:`Please select all ${children} child protein servings.`;er.classList.remove('hidden');return
    }
    const data=new FormData(f);
